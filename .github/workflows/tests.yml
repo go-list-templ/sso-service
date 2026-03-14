@@ -1,0 +1,56 @@
+name: Tests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      - name: Run Tests
+        run: |
+          cp .env.example .env
+          make test-cmd
+
+  test-coverage:
+    name: coverage test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      - name: Run Test Coverage
+        run: |
+          cp .env.example .env
+          make test-coverage-cmd
+
+  test-integration:
+    name: integration test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Test Integration
+        run: |
+          cp .env.example .env
+          make test-integration
+
+  test-stress:
+    name: stress test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run Test Stress
+        run: |
+          cp .env.example .env
+          make test-stress

@@ -1,0 +1,69 @@
+package otel
+
+import (
+	"context"
+	"fmt"
+	"os"
+
+	"github.com/go-list-templ/sso-service/pkg/config"
+	"go.opentelemetry.io/contrib/bridges/otelzap"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
+	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+)
+
+type Logger struct {
+	*zap.Logger
+
+	Provider *log.LoggerProvider
+}
+
+func NewLogger(ctx context.Context, res *resource.Resource, cfg *config.Config) (*Logger, error) {
+	provider, err := NewLoggerProvider(ctx, res, &cfg.Otel)
+	if err != nil {
+		return nil, err
+	}
+
+	logger := zap.New(
+		zapcore.NewTee(
+			zapcore.NewCore(
+				zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+				zapcore.AddSync(os.Stdout),
+				zapcore.InfoLevel,
+			),
+			otelzap.NewCore(cfg.App.Name, otelzap.WithLoggerProvider(provider)),
+		),
+	)
+
+	return &Logger{logger, provider}, nil
+}
+
+func NewLoggerProvider(ctx context.Context, res *resource.Resource, cfg *config.Otel) (*log.LoggerProvider, error) {
+	options := []otlploggrpc.Option{
+		otlploggrpc.WithEndpoint(cfg.Endpoint),
+	}
+
+	if !cfg.IsTLS {
+		options = append(options, otlploggrpc.WithInsecure())
+	}
+
+	exporter, err := otlploggrpc.New(ctx, options...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OTLP log exporter: %w", err)
+	}
+
+	processor := log.NewBatchProcessor(exporter)
+
+	provider := log.NewLoggerProvider(
+		log.WithProcessor(processor),
+		log.WithResource(res),
+	)
+
+	return provider, nil
+}
+
+func (l *Logger) Shutdown(ctx context.Context) error {
+	return l.Provider.Shutdown(ctx)
+}

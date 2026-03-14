@@ -1,0 +1,33 @@
+name: Lint
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  hadolint:
+    name: lint dockerfile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: .docker/app/Dockerfile
+          recursive: true
+
+  golangci:
+    name: lint code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.9.0
+          args: --config=.docker/lint/conf.yml --issues-exit-code=0

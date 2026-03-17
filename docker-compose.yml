@@ -11,7 +11,22 @@ services:
       - .env
     networks:
       - app
+    depends_on:
+      - mongo
 
+  mongo:
+    image: mongo:8.2.5
+    container_name: mongo.${APP_NAME}
+    ports:
+      - "${DB_PORT}:27017"
+    networks:
+      - app
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+    restart: unless-stopped
 
   otel:
     container_name: otel.${APP_NAME}
@@ -31,6 +46,9 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
+
+volumes:
+  mongo_data:
 
 networks:
   app:

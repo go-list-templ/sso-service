@@ -11,6 +11,7 @@ import (
 	httpserver "github.com/go-list-templ/sso-service/internal/adapter/http/server"
 	httphandler "github.com/go-list-templ/sso-service/internal/adapter/http/server/handler"
 
+	"github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo"
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/go-list-templ/sso-service/pkg/otel"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -49,6 +50,13 @@ func run() error {
 		logger.Error("set auto max procs", zap.Error(err))
 	}
 
+	logger.Info("initializing mongodb")
+
+	mdb, err := mongo.New(&cfg.DB, logger, telemetry)
+	if err != nil {
+		logger.Panic("init mongodb", zap.Error(err))
+	}
+
 	logger.Info("initializing servers")
 
 	grpcServer := grpcserver.New(&cfg.Server, logger.With(zap.String("module", "grpc server")))
@@ -85,6 +93,10 @@ func run() error {
 
 	if err = httpServer.Shutdown(ctx); err != nil {
 		logger.Error("http shutdown", zap.Error(err))
+	}
+
+	if err = mdb.Disconnect(ctx); err != nil {
+		logger.Error("mongo shutdown", zap.Error(err))
 	}
 
 	if err = telemetry.Shutdown(ctx); err != nil {

@@ -67,7 +67,10 @@ func run() error {
 
 	logger.Info("registering http handlers")
 
-	httphandler.RegisterDiagnostic(logger.With(zap.String("module", "diagnostic handler")))
+	httphandler.RegisterDiagnostic(
+		logger.With(zap.String("module", "diagnostic handler")),
+		mdb,
+	)
 
 	logger.Info("server started successfully")
 

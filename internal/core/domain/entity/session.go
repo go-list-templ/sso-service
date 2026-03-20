@@ -1,18 +1,19 @@
 package entity
 
 import (
-	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 	"time"
 
+	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 	"github.com/go-list-templ/sso-service/internal/core/domain/vo"
 )
 
 type Session struct {
-	ID        vo.ID
-	UserID    vo.ID
-	Token     string
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	ID           vo.ID
+	UserID       vo.ID
+	AccessToken  vo.AccessToken
+	RefreshToken string
+	ExpiresAt    time.Time
+	CreatedAt    time.Time
 }
 
 func NewSession(userID string) (Session, error) {
@@ -24,10 +25,11 @@ func NewSession(userID string) (Session, error) {
 	}
 
 	return Session{
-		ID:        id,
-		UserID:    validUserId,
-		Token:     "",
-		CreatedAt: time.Now(),
-		ExpiresAt: time.Now(),
+		ID:           id,
+		UserID:       validUserId,
+		AccessToken:  vo.NewAccessToken(),
+		RefreshToken: "",
+		CreatedAt:    time.Now(),
+		ExpiresAt:    time.Now(),
 	}, nil
 }

@@ -11,7 +11,9 @@ type Auth struct {
 	authRepo port.AuthRepo
 }
 
-func NewAuth() {}
+func NewAuth(a port.AuthRepo) *Auth {
+	return &Auth{a}
+}
 
 func (a *Auth) Register(context.Context, dto.AuthInput) (dto.AuthOutput, error) {
 	return dto.AuthOutput{}, nil

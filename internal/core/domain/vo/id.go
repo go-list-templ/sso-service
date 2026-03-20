@@ -2,6 +2,7 @@ package vo
 
 import (
 	"errors"
+
 	"github.com/google/uuid"
 )
 

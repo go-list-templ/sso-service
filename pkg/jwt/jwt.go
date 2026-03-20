@@ -3,10 +3,11 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
 
+	"github.com/go-list-templ/sso-service/pkg/private_key"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 var secret = "secret"
@@ -26,13 +27,15 @@ var token = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 var ErrInvalidToken = errors.New("invalid token")
 
 func keyFunc() jwt.Keyfunc {
-	return func(_ *jwt.Token) (interface{}, error) { return secret, nil }
+	privateKey, _ := private_key.LoadPrivateKey("")
+
+	return func(_ *jwt.Token) (interface{}, error) { return privateKey.PublicKey, nil }
 }
 
 func verifyAccessToken(accessToken string) error {
 	token, err := jwt.Parse(accessToken,
 		keyFunc(),
-		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
+		jwt.WithValidMethods([]string{jwt.SigningMethodRS256.Name}),
 		jwt.WithIssuer(issuer),
 		jwt.WithExpirationRequired(),
 	)
@@ -70,8 +73,10 @@ func createAccessToken() (string, error) {
 		"user_name":  "name",
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secret)
+	privateKey := ""
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	return token.SignedString(privateKey)
 }
 
 func createRefreshToken() (string, error) {
@@ -86,9 +91,10 @@ func createRefreshToken() (string, error) {
 		"type": "refresh",
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	privateKey := ""
 
-	signed, err := token.SignedString(secret)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	signed, err := token.SignedString(privateKey)
 	if err != nil {
 		return "", err
 	}

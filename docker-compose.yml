@@ -9,6 +9,8 @@ services:
       - "${DIAGNOSTIC_PORT}:${DIAGNOSTIC_PORT}"
     env_file:
       - .env
+    secrets:
+      - jwt_private_key
     networks:
       - app
     depends_on:
@@ -46,6 +48,10 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
+
+secrets:
+  jwt_private_key:
+    file: .docker/secrets/jwt_private.pem
 
 volumes:
   mongo_data:

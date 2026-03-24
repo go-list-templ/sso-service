@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-list-templ/sso-service/pkg/private_key"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-var secret = "secret"
-
+// todo from config app name
 const issuer = "sso"
 
 var claims = jwt.MapClaims{
@@ -22,12 +20,12 @@ var claims = jwt.MapClaims{
 	"user_name":  "user",
 }
 
-var token = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+var token = jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
 var ErrInvalidToken = errors.New("invalid token")
 
 func keyFunc() jwt.Keyfunc {
-	privateKey, _ := private_key.LoadPrivateKey("")
+	privateKey, _ := LoadPrivateKey()
 
 	return func(_ *jwt.Token) (interface{}, error) { return privateKey.PublicKey, nil }
 }
@@ -106,7 +104,7 @@ func createRefreshToken() (string, error) {
 
 func verifyRefreshToken(refreshToken string) error {
 	token, err := jwt.Parse(refreshToken, keyFunc(),
-		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
+		jwt.WithValidMethods([]string{jwt.SigningMethodRS256.Name}),
 		jwt.WithIssuer(issuer),
 		jwt.WithExpirationRequired(),
 	)

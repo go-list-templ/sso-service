@@ -33,3 +33,5 @@ go.work.sum
 *schema.sql
 
 .docker/otel/data
+
+.docker/secrets/*

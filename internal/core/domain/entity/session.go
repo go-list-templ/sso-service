@@ -10,7 +10,6 @@ import (
 type Session struct {
 	ID           vo.ID
 	UserID       vo.ID
-	AccessToken  vo.AccessToken
 	RefreshToken string
 	ExpiresAt    time.Time
 	CreatedAt    time.Time
@@ -27,7 +26,6 @@ func NewSession(userID string) (Session, error) {
 	return Session{
 		ID:           id,
 		UserID:       validUserId,
-		AccessToken:  vo.NewAccessToken(),
 		RefreshToken: "",
 		CreatedAt:    time.Now(),
 		ExpiresAt:    time.Now(),

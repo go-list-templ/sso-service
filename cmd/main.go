@@ -8,10 +8,13 @@ import (
 	"syscall"
 
 	grpcserver "github.com/go-list-templ/sso-service/internal/adapter/grpc/server"
+	grpchandler "github.com/go-list-templ/sso-service/internal/adapter/grpc/server/handler"
 	httpserver "github.com/go-list-templ/sso-service/internal/adapter/http/server"
 	httphandler "github.com/go-list-templ/sso-service/internal/adapter/http/server/handler"
+	mongorepo "github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo/repo"
 
 	"github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo"
+	"github.com/go-list-templ/sso-service/internal/core/service"
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/go-list-templ/sso-service/pkg/otel"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -52,10 +55,18 @@ func run() error {
 
 	logger.Info("initializing mongodb")
 
-	mdb, err := mongo.New(&cfg.DB, logger, telemetry)
+	mdb, err := mongo.New(&cfg.DB, logger.With(zap.String("module", "mongo")), telemetry)
 	if err != nil {
 		logger.Panic("init mongodb", zap.Error(err))
 	}
+
+	logger.Info("initializing repositories")
+
+	authMongoRepo := mongorepo.NewAuth(mdb, logger.With(zap.String("module", "mongo auth repo")))
+
+	logger.Info("initializing services")
+
+	authService := service.NewAuth(authMongoRepo)
 
 	logger.Info("initializing servers")
 
@@ -64,6 +75,10 @@ func run() error {
 
 	httpServer := httpserver.NewHTTP(&cfg.Server)
 	httpServer.Start()
+
+	logger.Info("registering grpc handlers")
+
+	grpchandler.RegisterAuth(grpcServer.Server, authService, logger.With(zap.String("module", "auth handler")))
 
 	logger.Info("registering http handlers")
 

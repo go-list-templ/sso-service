@@ -27,6 +27,11 @@ type (
 		ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT"`
 	}
 
+	UserClient struct {
+		Host string `envconfig:"USER_CLIENT_HOST"`
+		Port string `envconfig:"USER_CLIENT_PORT"`
+	}
+
 	DB struct {
 		URL string `envconfig:"DB_URL"`
 	}
@@ -37,10 +42,11 @@ type (
 	}
 
 	Config struct {
-		App    App
-		Server Server
-		DB     DB
-		Otel   Otel
+		App        App
+		Server     Server
+		UserClient UserClient
+		DB         DB
+		Otel       Otel
 	}
 )
 

@@ -2,18 +2,19 @@ package service
 
 import (
 	"context"
-	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
 
+	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
 	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/internal/port"
 )
 
 type Auth struct {
-	repo port.AuthRepo
+	repo       port.AuthRepo
+	userClient port.UserClient
 }
 
-func NewAuth(a port.AuthRepo) *Auth {
-	return &Auth{a}
+func NewAuth(a port.AuthRepo, u port.UserClient) *Auth {
+	return &Auth{a, u}
 }
 
 func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, error) {
@@ -22,9 +23,17 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	//todo create user from users-service
+	createInput := dto.UserCreateInput{
+		Email:    input.Email,
+		Password: input.Password,
+	}
 
-	session, err := entity.NewSession("")
+	createOutput, err := a.userClient.Create(ctx, createInput)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	session, err := entity.NewSession(createOutput.UserId)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

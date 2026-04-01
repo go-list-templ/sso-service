@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	grpclient "github.com/go-list-templ/sso-service/internal/adapter/grpc/client"
 	grpcserver "github.com/go-list-templ/sso-service/internal/adapter/grpc/server"
 	grpchandler "github.com/go-list-templ/sso-service/internal/adapter/grpc/server/handler"
 	httpserver "github.com/go-list-templ/sso-service/internal/adapter/http/server"
@@ -64,9 +65,16 @@ func run() error {
 
 	authMongoRepo := mongorepo.NewAuth(mdb, logger.With(zap.String("module", "mongo auth repo")))
 
+	logger.Info("initializing clients")
+
+	userClient, err := grpclient.RegisterUser(&cfg.UserClient, logger.With(zap.String("module", "user client")))
+	if err != nil {
+		logger.Panic("init user client", zap.Error(err))
+	}
+
 	logger.Info("initializing services")
 
-	authService := service.NewAuth(authMongoRepo)
+	authService := service.NewAuth(authMongoRepo, userClient)
 
 	logger.Info("initializing servers")
 

@@ -20,9 +20,9 @@ type (
 		GRPCMaxConnIdle time.Duration `envconfig:"GRPC_MAX_CONN_IDLE"`
 		GRPCMaxConnAge  time.Duration `envconfig:"GRPC_MAX_CONN_AGE"`
 
-		DiagnosticPort string        `envconfig:"DIAGNOSTIC_PORT"`
-		HTTPTimeout    time.Duration `envconfig:"HTTP_TIMEOUT"`
-		IdleTimeout    time.Duration `envconfig:"IDLE_TIMEOUT"`
+		HTTPort     string        `envconfig:"HTTP_PORT"`
+		HTTPTimeout time.Duration `envconfig:"HTTP_TIMEOUT"`
+		IdleTimeout time.Duration `envconfig:"IDLE_TIMEOUT"`
 
 		ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT"`
 	}
@@ -37,8 +37,10 @@ type (
 	}
 
 	Otel struct {
-		Endpoint string `envconfig:"OTEL_ENDPOINT"`
-		IsTLS    bool   `envconfig:"OTEL_IS_TLS"`
+		PyroscopeEndpoint string        `envconfig:"OTEL_PYROSCOPE_ENDPOINT"`
+		Endpoint          string        `envconfig:"OTEL_ENDPOINT"`
+		IsTLS             bool          `envconfig:"OTEL_IS_TLS"`
+		Timeout           time.Duration `envconfig:"OTEL_TIMEOUT"`
 	}
 
 	Config struct {

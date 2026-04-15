@@ -9,17 +9,20 @@ permissions:
   contents: read
 
 jobs:
-  hadolint:
-    name: lint dockerfile
+  helm-lint:
+    name: helm lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: hadolint/hadolint-action@v3.1.0
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          dockerfile: .docker/app/Dockerfile
-          recursive: true
+          fetch-depth: 0
+      - name: Install werf
+        uses: werf/actions/install@v2
+      - name: Run script
+        run: make helm-lint
 
-  golangci:
+  code-lint:
     name: lint code
     runs-on: ubuntu-latest
     steps:
@@ -30,4 +33,4 @@ jobs:
       - uses: golangci/golangci-lint-action@v9
         with:
           version: v2.9.0
-          args: --config=.docker/lint/conf.yml --issues-exit-code=0
+          args: --config=lint.yml

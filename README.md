@@ -4,9 +4,63 @@ Template sso service on go
 
 ---
 
-Init project
+## Create secret and login in docker registry
+
+Create namespace
 
 ```bash
-cp .env.example .env ; make init
+kubectl create namespace sso-service
 ```
 
+Create secret
+
+```bash
+kubectl create secret docker-registry registrysecret \                                                        
+  --docker-server=ghcr.io/go-list-templ/sso-service \
+  --docker-username=go-list-templ \
+  --docker-password=GH_TOKEN \
+  -n sso-service
+```
+
+Login
+
+```bash
+werf cr login -u go-list-templ -p GH_TOKEN ghcr.io/go-list-templ/sso-service
+```
+
+---
+
+## Install dependency helm
+
+```bash
+werf helm dependency update .helm
+```
+
+---
+
+## Run and build App
+
+Run and deploy to from Helm to Kuber
+
+```bash
+werf converge --repo=ghcr.io/go-list-templ/sso-service --platform=linux/amd64
+```
+
+Stop and remove release in kuber
+
+```bash
+werf dismiss
+```
+
+Forward port on localhost from app
+
+```bash
+werf kubectl port-forward svc/sso-service 8080:8080 -n sso-service
+werf kubectl port-forward svc/sso-service 8081:8081 -n sso-service
+```
+
+Delete all images from container registry (token with rules on write+delete packages)
+
+```bash
+werf purge --repo ghcr.io/go-list-templ/sso-service --repo-github-token GH_TOKEN
+```

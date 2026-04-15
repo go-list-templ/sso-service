@@ -27,6 +27,8 @@ app:
   shutdownTimeout: "30s"
 
 mongodb:
+  host: mongodb
+  port: 27017
   auth:
     enabled: true
     rootPassword: root
@@ -43,7 +45,6 @@ mongodb:
     limits:
       cpu: 1
       memory: 512Mi
-
 
 telemetry:
   collector:

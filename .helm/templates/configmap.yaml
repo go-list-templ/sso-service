@@ -17,7 +17,7 @@ data:
   IDLE_TIMEOUT: {{ .Values.app.http.idleTimeout | quote }}
   SHUTDOWN_TIMEOUT: {{ .Values.app.shutdownTimeout | quote }}
 
-  DB_URL: "mongodb://mongo:27017"
+  DB_URL: "mongodb://{{ .Release.Name }}-{{ .Values.mongodb.host }}:{{ .Values.mongodb.port }}"
 
   USER_CLIENT_HOST: {{ .Values.app.clients.users.host | quote }}
   USER_CLIENT_PORT: {{ .Values.app.clients.users.port | quote }}

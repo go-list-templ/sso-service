@@ -10,21 +10,21 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-        - name: waiting-postgresql
+        - name: waiting-mongodb
           image: busybox
           command:
             - sh
             - -c
             - |
               until nc -w 2 $(DB_HOST) $(DB_PORT); do
-                echo "Waiting for postgres...";
+                echo "Waiting for mongodb...";
                 sleep 2;
               done;
           env:
             - name: DB_HOST
-              value: "{{ .Release.Name }}-{{ .Values.postgresql.host }}"
+              value: "{{ .Release.Name }}-{{ .Values.mongodb.host }}"
             - name: DB_PORT
-              value: {{ .Values.postgresql.port | quote }}
+              value: {{ .Values.mongodb.port | quote }}
           resources:
             requests:
               cpu: 50m

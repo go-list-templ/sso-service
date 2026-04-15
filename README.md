@@ -16,7 +16,7 @@ Create secret
 
 ```bash
 kubectl create secret docker-registry registrysecret \
-  --docker-server=ghcr.io \
+  --docker-server=ghcr.io/go-list-templ \
   --docker-username=go-list-templ \
   --docker-password=GH_TOKEN
 ```
@@ -24,7 +24,7 @@ kubectl create secret docker-registry registrysecret \
 Login
 
 ```bash
-werf cr login -u go-list-templ -p GH_TOKEN
+werf cr login ghcr.io/go-list-templ -u go-list-templ -p GH_TOKEN
 ```
 
 ---

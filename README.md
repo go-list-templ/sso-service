@@ -15,17 +15,16 @@ kubectl create namespace sso-service
 Create secret
 
 ```bash
-kubectl create secret docker-registry registrysecret \                                                        
-  --docker-server=ghcr.io/go-list-templ/sso-service \
+kubectl create secret docker-registry registrysecret \
+  --docker-server=ghcr.io \
   --docker-username=go-list-templ \
-  --docker-password=GH_TOKEN \
-  -n sso-service
+  --docker-password=GH_TOKEN
 ```
 
 Login
 
 ```bash
-werf cr login -u go-list-templ -p GH_TOKEN ghcr.io/go-list-templ/sso-service
+werf cr login -u go-list-templ -p GH_TOKEN
 ```
 
 ---

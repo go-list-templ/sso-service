@@ -1,0 +1,10 @@
+apiVersion: v2
+name: users-service
+version: 1.0.0
+
+dependencies:
+  - name: mongodb
+    version: "18.6.26"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: mongodb.enabled
+    alias: mongodb

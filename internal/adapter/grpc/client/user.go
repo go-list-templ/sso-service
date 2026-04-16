@@ -48,12 +48,10 @@ func (u *User) Create(ctx context.Context, input dto.UserCreateInput) (dto.UserC
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
-				return dto.UserCreateOutput{}, NewUserInvalidArgument(err)
+				return dto.UserCreateOutput{}, NewUserInvalidArgument(st.Message(), err)
 			case codes.AlreadyExists:
-				return dto.UserCreateOutput{}, NewUserExists(err)
+				return dto.UserCreateOutput{}, NewUserExists(st.Message(), err)
 			default:
-				u.logger.Info("err create user", zap.Any("context", ctx), zap.String("unknown code", st.Code().String()))
-
 				return dto.UserCreateOutput{}, err
 			}
 		}

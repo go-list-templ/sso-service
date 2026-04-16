@@ -18,11 +18,6 @@ func NewAuth(a port.AuthRepo, u port.UserClient) *Auth {
 }
 
 func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, error) {
-	err := input.Validate()
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
 	createInput := dto.UserCreateInput{
 		Email:    input.Email,
 		Password: input.Password,

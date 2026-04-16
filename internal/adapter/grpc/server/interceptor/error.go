@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/go-list-templ/sso-service/internal/adapter/grpc/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,6 +33,10 @@ func ErrorHandling() grpc.UnaryServerInterceptor {
 
 func toGrpcError(err error) error {
 	switch {
+	case errors.Is(err, client.ErrUserExists):
+		return status.Error(codes.AlreadyExists, err.Error())
+	case errors.Is(err, client.ErrUserInvalidArgument):
+		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, context.DeadlineExceeded):
 		return status.Error(codes.DeadlineExceeded, ErrDeadlineExceeded)
 	default:

@@ -12,11 +12,7 @@ git:
         - "go.sum"
       setup:
         - "**/*.go"
-        - "migrations"
 shell:
-  beforeInstall:
-    - apk add curl tar
-    - curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz | tar xvz
   install:
     - cd /app && go mod download
   setup:
@@ -25,14 +21,6 @@ shell:
 image: app
 from: gcr.io/distroless/static-debian12:nonroot
 import:
-  - image: build
-    add: /migrate
-    to: /migrations/migrate
-    after: setup
-  - image: build
-    add: /app/migrations
-    to: /migrations/schemes
-    after: setup
   - image: build
     add: /bin/app
     to: /bin/app

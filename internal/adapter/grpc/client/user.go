@@ -9,7 +9,9 @@ import (
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 type User struct {
@@ -43,7 +45,18 @@ func (u *User) Create(ctx context.Context, input dto.UserCreateInput) (dto.UserC
 	if err != nil {
 		u.logger.Error("create user", zap.Any("context", ctx), zap.Error(err))
 
-		return dto.UserCreateOutput{}, err
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.InvalidArgument:
+				return dto.UserCreateOutput{}, NewUserInvalidArgument(err)
+			case codes.AlreadyExists:
+				return dto.UserCreateOutput{}, NewUserExists(err)
+			default:
+				u.logger.Info("err create user", zap.Any("context", ctx), zap.String("unknown code", st.Code().String()))
+
+				return dto.UserCreateOutput{}, err
+			}
+		}
 	}
 
 	return dto.UserCreateOutput{

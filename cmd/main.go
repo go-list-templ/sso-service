@@ -63,7 +63,7 @@ func run() error {
 
 	logger.Info("initializing repositories")
 
-	authMongoRepo := mongorepo.NewAuth(mdb, logger.With(zap.String("module", "mongo auth repo")))
+	authMongoRepo := mongorepo.NewSession(mdb, logger.With(zap.String("module", "mongo auth repo")))
 
 	logger.Info("initializing clients")
 

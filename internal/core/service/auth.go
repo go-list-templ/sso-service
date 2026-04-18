@@ -9,11 +9,11 @@ import (
 )
 
 type Auth struct {
-	repo       port.AuthRepo
+	repo       port.SessionRepo
 	userClient port.UserClient
 }
 
-func NewAuth(a port.AuthRepo, u port.UserClient) *Auth {
+func NewAuth(a port.SessionRepo, u port.UserClient) *Auth {
 	return &Auth{a, u}
 }
 
@@ -33,7 +33,7 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	if err = a.repo.Register(ctx, session); err != nil {
+	if err = a.repo.Store(ctx, session); err != nil {
 		return dto.AuthOutput{}, err
 	}
 

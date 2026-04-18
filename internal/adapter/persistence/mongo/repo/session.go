@@ -22,7 +22,7 @@ func NewSession(m *mongo.Mongo, l *zap.Logger) *Session {
 }
 
 func (s Session) Store(ctx context.Context, session entity.Session) error {
-	collection := s.Collection(Collection)
+	collection := s.Database.Collection(Collection)
 
 	sessionDAO := dao.FromEntity(session)
 

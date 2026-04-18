@@ -118,7 +118,7 @@ func run() error {
 		logger.Error("http shutdown", zap.Error(err))
 	}
 
-	if err = mdb.Disconnect(ctx); err != nil {
+	if err = mdb.Client.Disconnect(ctx); err != nil {
 		logger.Error("mongo shutdown", zap.Error(err))
 	}
 

@@ -18,6 +18,7 @@ data:
   SHUTDOWN_TIMEOUT: {{ .Values.app.shutdownTimeout | quote }}
 
   DB_URL: "mongodb://{{ .Release.Name }}-{{ .Values.mongodb.host }}:{{ .Values.mongodb.port }}"
+  DB_NAME: {{.Values.mongodb.auth.database | quote}}
 
   USER_CLIENT_HOST: {{ .Values.app.clients.users.host | quote }}
   USER_CLIENT_PORT: {{ .Values.app.clients.users.port | quote }}

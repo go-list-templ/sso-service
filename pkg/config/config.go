@@ -33,7 +33,8 @@ type (
 	}
 
 	DB struct {
-		URL string `envconfig:"DB_URL"`
+		URL  string `envconfig:"DB_URL"`
+		Name string `envconfig:"DB_NAME"`
 	}
 
 	Otel struct {

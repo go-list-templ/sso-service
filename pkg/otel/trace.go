@@ -3,6 +3,7 @@ package otel
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel/propagation"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"go.opentelemetry.io/otel"
@@ -44,6 +45,11 @@ func NewTraceProvider(ctx context.Context, res *resource.Resource, cfg *config.O
 	)
 
 	otel.SetTracerProvider(provider)
+
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
 
 	return provider, nil
 }

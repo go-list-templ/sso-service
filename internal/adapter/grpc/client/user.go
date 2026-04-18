@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/pkg/config"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -21,9 +22,11 @@ type User struct {
 }
 
 func RegisterUser(cfg *config.UserClient, l *zap.Logger) (*User, error) {
-	url := cfg.Host + ":" + cfg.Port
-
-	grpcConn, err := grpc.NewClient(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConn, err := grpc.NewClient(
+		cfg.Host+":"+cfg.Port,
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		return nil, err
 	}

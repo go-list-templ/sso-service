@@ -3,6 +3,7 @@ package interceptor
 import (
 	"context"
 	"errors"
+
 	"github.com/go-list-templ/sso-service/internal/adapter/grpc/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -10,6 +11,11 @@ import (
 )
 
 const ErrInternalServer = "internal server"
+
+var allErr = map[error]codes.Code{
+	client.ErrUserExists:          codes.AlreadyExists,
+	client.ErrUserInvalidArgument: codes.InvalidArgument,
+}
 
 func ErrorHandling() grpc.UnaryServerInterceptor {
 	return func(
@@ -25,11 +31,6 @@ func ErrorHandling() grpc.UnaryServerInterceptor {
 
 		return resp, nil
 	}
-}
-
-var allErr = map[error]codes.Code{
-	client.ErrUserExists:          codes.AlreadyExists,
-	client.ErrUserInvalidArgument: codes.InvalidArgument,
 }
 
 func toGrpcError(err error) error {

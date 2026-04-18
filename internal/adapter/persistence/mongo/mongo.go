@@ -21,13 +21,11 @@ const (
 )
 
 type Mongo struct {
-	*mongo.Client
+	*mongo.Database
 }
 
 func New(cfg *config.DB, logger *zap.Logger, telemetry *otel.Telemetry) (*Mongo, error) {
 	var err error
-
-	mg := &Mongo{}
 
 	connAttempts := DefaultConnAttempts
 	connTimeout := DefaultConnTimeout
@@ -35,25 +33,26 @@ func New(cfg *config.DB, logger *zap.Logger, telemetry *otel.Telemetry) (*Mongo,
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
 	defer cancel()
 
+	client := &mongo.Client{}
+
 	for connAttempts > 0 {
 		opts := options.Client()
 
 		opts.Monitor = otelmongo.NewMonitor(
 			otelmongo.WithTracerProvider(telemetry.Tracer.Provider),
-			otelmongo.WithMeterProvider(telemetry.Metric.Provider),
 		)
 
-		mg.Client, err = mongo.Connect(opts.ApplyURI(cfg.URL))
+		client, err = mongo.Connect(opts.ApplyURI(cfg.URL))
 		if err != nil {
-			logger.Info("mongo err connect", zap.Error(err))
+			logger.Error("connect", zap.Error(err))
 		}
 
-		err = mg.Ping(ctx, readpref.Primary())
+		err = client.Ping(ctx, readpref.Primary())
 		if err == nil {
 			break
 		}
 
-		logger.Warn("Postgres is trying to connect", zap.Int("attempts", connAttempts), zap.Error(err))
+		logger.Warn("trying to connect", zap.Int("attempts", connAttempts), zap.Error(err))
 
 		time.Sleep(connTimeout)
 
@@ -64,5 +63,5 @@ func New(cfg *config.DB, logger *zap.Logger, telemetry *otel.Telemetry) (*Mongo,
 		return nil, fmt.Errorf("end attempts exceeded: %w", err)
 	}
 
-	return mg, nil
+	return &Mongo{client.Database(cfg.Name)}, nil
 }

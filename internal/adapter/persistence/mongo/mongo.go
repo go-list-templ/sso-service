@@ -28,6 +28,11 @@ type Mongo struct {
 func New(cfg *config.DB, logger *zap.Logger, telemetry *otel.Telemetry) (*Mongo, error) {
 	var err error
 
+	url := fmt.Sprintf(
+		"mongodb://%s:%s@%s:%d/%s",
+		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Name,
+	)
+
 	connAttempts := DefaultConnAttempts
 	connTimeout := DefaultConnTimeout
 
@@ -43,7 +48,7 @@ func New(cfg *config.DB, logger *zap.Logger, telemetry *otel.Telemetry) (*Mongo,
 			otelmongo.WithTracerProvider(telemetry.Tracer.Provider),
 		)
 
-		client, err = mongo.Connect(opts.ApplyURI(cfg.URL))
+		client, err = mongo.Connect(opts.ApplyURI(url))
 		if err != nil {
 			logger.Error("connect", zap.Error(err))
 		}

@@ -17,8 +17,11 @@ data:
   IDLE_TIMEOUT: {{ .Values.app.http.idleTimeout | quote }}
   SHUTDOWN_TIMEOUT: {{ .Values.app.shutdownTimeout | quote }}
 
-  DB_URL: "mongodb://{{ .Release.Name }}-{{ .Values.mongodb.host }}:{{ .Values.mongodb.port }}"
-  DB_NAME: {{.Values.mongodb.auth.database | quote}}
+  DB_USERNAME: {{ .Values.mongodb.auth.username | quote }}
+  DB_PASSWORD: {{ .Values.mongodb.auth.password | quote }}
+  DB_HOST: "{{ .Release.Name }}-{{ .Values.mongodb.host }}"
+  DB_PORT: {{ .Values.mongodb.port | quote }}
+  DB_NAME: {{ .Values.mongodb.auth.database | quote }}
 
   USER_CLIENT_HOST: {{ .Values.app.clients.users.host | quote }}
   USER_CLIENT_PORT: {{ .Values.app.clients.users.port | quote }}

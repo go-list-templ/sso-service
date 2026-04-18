@@ -21,7 +21,8 @@ const (
 )
 
 type Mongo struct {
-	*mongo.Database
+	Client   *mongo.Client
+	Database *mongo.Database
 }
 
 func New(cfg *config.DB, logger *zap.Logger, telemetry *otel.Telemetry) (*Mongo, error) {
@@ -63,5 +64,8 @@ func New(cfg *config.DB, logger *zap.Logger, telemetry *otel.Telemetry) (*Mongo,
 		return nil, fmt.Errorf("end attempts exceeded: %w", err)
 	}
 
-	return &Mongo{client.Database(cfg.Name)}, nil
+	return &Mongo{
+		Client:   client,
+		Database: client.Database(cfg.Name),
+	}, nil
 }

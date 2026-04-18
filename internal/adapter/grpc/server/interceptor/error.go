@@ -3,17 +3,13 @@ package interceptor
 import (
 	"context"
 	"errors"
-
 	"github.com/go-list-templ/sso-service/internal/adapter/grpc/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-const (
-	ErrDeadlineExceeded = "request server timeout"
-	ErrInternalServer   = "internal server"
-)
+const ErrInternalServer = "internal server"
 
 func ErrorHandling() grpc.UnaryServerInterceptor {
 	return func(
@@ -31,15 +27,21 @@ func ErrorHandling() grpc.UnaryServerInterceptor {
 	}
 }
 
+var allErr = map[error]codes.Code{
+	client.ErrUserExists:          codes.AlreadyExists,
+	client.ErrUserInvalidArgument: codes.InvalidArgument,
+}
+
 func toGrpcError(err error) error {
-	switch {
-	case errors.Is(err, client.ErrUserExists):
-		return status.Error(codes.AlreadyExists, err.Error())
-	case errors.Is(err, client.ErrUserInvalidArgument):
-		return status.Error(codes.InvalidArgument, err.Error())
-	case errors.Is(err, context.DeadlineExceeded):
-		return status.Error(codes.DeadlineExceeded, ErrDeadlineExceeded)
-	default:
-		return status.Error(codes.Internal, ErrInternalServer)
+	if _, ok := status.FromError(err); ok {
+		return err
 	}
+
+	for currentErr, resCode := range allErr {
+		if errors.Is(err, currentErr) {
+			return status.Error(resCode, err.Error())
+		}
+	}
+
+	return status.Error(codes.Internal, ErrInternalServer)
 }

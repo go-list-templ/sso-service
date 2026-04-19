@@ -1,12 +1,13 @@
 package jwt
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 // todo from config app name
@@ -59,7 +60,7 @@ func verifyAccessToken(accessToken string) error {
 	return nil
 }
 
-func createAccessToken() (string, error) {
+func CreateAccessToken() (string, error) {
 	now := time.Now()
 
 	claims := jwt.MapClaims{
@@ -77,29 +78,14 @@ func createAccessToken() (string, error) {
 	return token.SignedString(privateKey)
 }
 
-func createRefreshToken() (string, error) {
-	tokenID := uuid.New().String()
-	now := time.Now()
-	claims := jwt.MapClaims{
-		"iss":  issuer,
-		"sub":  "email",
-		"iat":  now.Unix(),
-		"exp":  now.Add(7 * 24 * time.Hour).Unix(),
-		"jti":  tokenID,
-		"type": "refresh",
-	}
-
-	privateKey := ""
-
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	signed, err := token.SignedString(privateKey)
+func CreateRefreshToken() (string, error) {
+	b := make([]byte, 64)
+	_, err := rand.Read(b)
 	if err != nil {
 		return "", err
 	}
 
-	/* Если бы мы использовали opaqueToken, то мы бы хранили его hash */
-
-	return signed, nil
+	return base64.URLEncoding.EncodeToString(b), nil
 }
 
 func verifyRefreshToken(refreshToken string) error {

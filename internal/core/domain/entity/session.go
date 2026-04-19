@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 	"github.com/go-list-templ/sso-service/internal/core/domain/vo"
-	"github.com/go-list-templ/sso-service/pkg/jwt"
 )
 
 type Session struct {
@@ -16,17 +15,12 @@ type Session struct {
 	CreatedAt    time.Time
 }
 
-func NewSession(userID string) (Session, error) {
+func NewSession(userID string, refreshToken string) (Session, error) {
 	id := vo.NewID()
 
 	validUserId, err := vo.FromStr(userID)
 	if err != nil {
 		return Session{}, entityerr.NewSessionError("userId", err)
-	}
-
-	refreshToken, err := jwt.CreateRefreshToken()
-	if err != nil {
-		return Session{}, err
 	}
 
 	now := time.Now()

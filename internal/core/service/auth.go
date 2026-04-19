@@ -6,16 +6,17 @@ import (
 	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
 	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/internal/port"
-	"github.com/go-list-templ/sso-service/pkg/jwt"
+	"github.com/go-list-templ/sso-service/pkg/token"
 )
 
 type Auth struct {
 	repo       port.SessionRepo
 	userClient port.UserClient
+	token      *token.Token
 }
 
-func NewAuth(a port.SessionRepo, u port.UserClient) *Auth {
-	return &Auth{a, u}
+func NewAuth(a port.SessionRepo, u port.UserClient, t *token.Token) *Auth {
+	return &Auth{a, u, t}
 }
 
 func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, error) {
@@ -29,7 +30,12 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	session, err := entity.NewSession(createOutput.UserId)
+	refreshToken, err := a.token.CreateRefresh()
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	session, err := entity.NewSession(createOutput.UserId, refreshToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}
@@ -38,7 +44,7 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	accessToken, err := jwt.CreateAccessToken()
+	accessToken, err := a.token.CreateAccess()
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

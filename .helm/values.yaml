@@ -54,7 +54,7 @@ telemetry:
   pyroscope:
     url: "http://alloy.telemetry.svc.cluster.local:4040"
 
-secret:
+privateKey:
   path: "/run/secrets"
-  jwt:
-    name: "jwt_private_key"
+  name: "jwt_private_key"
+

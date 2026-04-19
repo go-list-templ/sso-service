@@ -33,6 +33,8 @@ func (a *Auth) Register(ctx context.Context, request *v1.RegisterRequest) (*v1.R
 
 	output, err := a.service.Register(ctx, input)
 	if err != nil {
+		a.logger.Warn("register", zap.Any("context", ctx), zap.Error(err))
+
 		return nil, err
 	}
 

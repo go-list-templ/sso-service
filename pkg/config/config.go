@@ -47,9 +47,9 @@ type (
 		Timeout           time.Duration `envconfig:"OTEL_TIMEOUT"`
 	}
 
-	Secret struct {
-		Path       string `envconfig:"SECRET_PATH"`
-		PrivateKey string `envconfig:"SECRET_PRIVATE_KEY"`
+	PrivateKey struct {
+		Path string `envconfig:"PRIVATE_KEY_PATH"`
+		Name string `envconfig:"PRIVATE_KEY_NAME"`
 	}
 
 	Config struct {
@@ -58,6 +58,7 @@ type (
 		UserClient UserClient
 		DB         DB
 		Otel       Otel
+		PrivateKey PrivateKey
 	}
 )
 
@@ -65,7 +66,7 @@ func Load() (*Config, error) {
 	var cfg Config
 	err := envconfig.Process("", &cfg)
 	if err != nil {
-		return nil, fmt.Errorf("can't process the config: %w", err)
+		return nil, fmt.Errorf("process the config: %w", err)
 	}
 
 	return &cfg, nil

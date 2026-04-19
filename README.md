@@ -49,7 +49,7 @@ make generate-private-key
 Create secret
 
 ```bash
-kubectl create secret generic jwt-secret \
+kubectl create secret generic token-secret \
   --from-file=jwt_private_key=./secrets/jwt_private_key \
   -n sso-service
 ```

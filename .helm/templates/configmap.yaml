@@ -30,3 +30,6 @@ data:
   OTEL_ENDPOINT: {{ .Values.telemetry.collector.url | quote}}
   OTEL_PYROSCOPE_ENDPOINT: {{ .Values.telemetry.pyroscope.url | quote}}
   OTEL_TIMEOUT: {{ .Values.telemetry.collector.timeout | quote }}
+
+  SECRET_PATH: {{ .Values.secret.path | quote }}
+  SECRET_PRIVATE_KEY: {{ .Values.secret.jwt.name | quote }}

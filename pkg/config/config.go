@@ -47,6 +47,11 @@ type (
 		Timeout           time.Duration `envconfig:"OTEL_TIMEOUT"`
 	}
 
+	Secret struct {
+		Path       string `envconfig:"SECRET_PATH"`
+		PrivateKey string `envconfig:"SECRET_PRIVATE_KEY"`
+	}
+
 	Config struct {
 		App        App
 		Server     Server

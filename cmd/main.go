@@ -76,7 +76,10 @@ func run() error {
 
 	logger.Info("initializing pkg key")
 
-	privateKey := key.NewPrivate(&cfg.PrivateKey, logger.With(zap.String("module", "private key")))
+	privateKey, err := key.NewPrivate(&cfg.PrivateKey)
+	if err != nil {
+		logger.Panic("init private key", zap.Error(err))
+	}
 
 	logger.Info("initializing pkg token")
 

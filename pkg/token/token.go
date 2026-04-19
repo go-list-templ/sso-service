@@ -45,10 +45,8 @@ func (t *Token) CreateAccess() (string, error) {
 		"user_name":  "name",
 	}
 
-	privateKey := ""
-
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	return token.SignedString(privateKey)
+	return token.SignedString(t.privateKey)
 }
 
 func (t *Token) CreateRefresh() (string, error) {
@@ -64,9 +62,7 @@ func (t *Token) CreateRefresh() (string, error) {
 }
 
 func (t *Token) keyFunc() jwt.Keyfunc {
-	privateKey, _ := t.privateKey.LoadKey()
-
-	return func(_ *jwt.Token) (interface{}, error) { return privateKey.PublicKey, nil }
+	return func(_ *jwt.Token) (interface{}, error) { return t.privateKey, nil }
 }
 
 func (t *Token) verifyAccess(accessToken string) error {

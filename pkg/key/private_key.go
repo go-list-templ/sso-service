@@ -2,44 +2,37 @@ package key
 
 import (
 	"crypto/rsa"
-	"errors"
 	"os"
 	"path/filepath"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/golang-jwt/jwt/v5"
-	"go.uber.org/zap"
-)
-
-var (
-	ErrReadFile = errors.New("read file")
-	ErrParseKey = errors.New("parse private key")
 )
 
 type Private struct {
-	cfg    *config.PrivateKey
-	logger *zap.Logger
+	*rsa.PrivateKey
 }
 
-func NewPrivate(cfg *config.PrivateKey, l *zap.Logger) *Private {
-	return &Private{cfg, l}
+func NewPrivate(cfg *config.PrivateKey) (*Private, error) {
+	pk, err := loadKey(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Private{pk}, nil
 }
 
-func (p *Private) LoadKey() (*rsa.PrivateKey, error) {
-	pk := filepath.Join(p.cfg.Path, p.cfg.Name)
+func loadKey(cfg *config.PrivateKey) (*rsa.PrivateKey, error) {
+	pk := filepath.Join(cfg.Path, cfg.Name)
 
 	data, err := os.ReadFile(pk)
 	if err != nil {
-		p.logger.Error(ErrReadFile.Error(), zap.Error(err))
-
-		return nil, ErrReadFile
+		return nil, err
 	}
 
 	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(data)
 	if err != nil {
-		p.logger.Error(ErrParseKey.Error(), zap.Error(err))
-
-		return nil, ErrParseKey
+		return nil, err
 	}
 
 	return privateKey, nil

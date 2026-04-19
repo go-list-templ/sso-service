@@ -6,6 +6,7 @@ import (
 	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
 	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/internal/port"
+	"github.com/go-list-templ/sso-service/pkg/jwt"
 )
 
 type Auth struct {
@@ -37,8 +38,13 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
+	accessToken, err := jwt.CreateAccessToken()
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
 	return dto.AuthOutput{
-		AccessToken:  "",
+		AccessToken:  accessToken,
 		RefreshToken: session.RefreshToken,
 	}, nil
 }

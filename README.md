@@ -38,6 +38,24 @@ werf helm dependency update .helm
 
 ---
 
+## Generate secret
+
+Generate private key
+
+```bash
+make generate-private-key
+```
+
+Create secret
+
+```bash
+kubectl create secret generic jwt-secret \
+  --from-file=jwt_private_key=./secrets/jwt_private_key \
+  -n sso-service
+```
+
+---
+
 ## Run and build App
 
 Run and deploy to from Helm to Kuber

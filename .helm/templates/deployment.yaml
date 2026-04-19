@@ -21,7 +21,7 @@ spec:
           image: {{ .Values.werf.image.app }}
           volumeMounts:
             - name: jwt-secret-volume
-              mountPath: {{ .Values.secret.path }}
+              mountPath: {{ .Values.privateKey.path }}
               readOnly: true
           ports:
             - name: {{ .Values.app.grpc.name }}
@@ -55,6 +55,3 @@ spec:
         - name: jwt-secret-volume
           secret:
             secretName: jwt-secret
-            items:
-              - key: {{ .Values.secret.jwt.name }}
-                path: {{ .Values.secret.jwt.name }}

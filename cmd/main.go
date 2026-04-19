@@ -17,7 +17,9 @@ import (
 	"github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo"
 	"github.com/go-list-templ/sso-service/internal/core/service"
 	"github.com/go-list-templ/sso-service/pkg/config"
+	"github.com/go-list-templ/sso-service/pkg/key"
 	"github.com/go-list-templ/sso-service/pkg/otel"
+	"github.com/go-list-templ/sso-service/pkg/token"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 )
@@ -72,9 +74,17 @@ func run() error {
 		logger.Panic("init user client", zap.Error(err))
 	}
 
+	logger.Info("initializing pkg key")
+
+	privateKey := key.NewPrivate(&cfg.PrivateKey, logger.With(zap.String("module", "private key")))
+
+	logger.Info("initializing pkg token")
+
+	tk := token.NewToken(cfg, logger.With(zap.String("module", "token")), privateKey)
+
 	logger.Info("initializing services")
 
-	authService := service.NewAuth(authMongoRepo, userClient)
+	authService := service.NewAuth(authMongoRepo, userClient, tk)
 
 	logger.Info("initializing servers")
 

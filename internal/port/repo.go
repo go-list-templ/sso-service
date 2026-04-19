@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+
 	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
 )
 

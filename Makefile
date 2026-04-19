@@ -6,6 +6,9 @@ install:
 build:
 	werf converge --repo=ghcr.io/go-list-templ/users-service --platform=linux/amd64
 
+generate-private-key:
+	openssl genrsa -out secrets/jwt_private_key 4096
+
 down:
 	werf dismiss
 

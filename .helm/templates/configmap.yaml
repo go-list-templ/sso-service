@@ -31,5 +31,4 @@ data:
   OTEL_PYROSCOPE_ENDPOINT: {{ .Values.telemetry.pyroscope.url | quote}}
   OTEL_TIMEOUT: {{ .Values.telemetry.collector.timeout | quote }}
 
-  PRIVATE_KEY_PATH: {{ .Values.privateKey.path | quote }}
-  PRIVATE_KEY_NAME: {{ .Values.privateKey.name | quote }}
+  PRIVATE_KEY_FILE: {{ .Values.privateKey.file | quote }}

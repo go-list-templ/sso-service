@@ -55,6 +55,5 @@ telemetry:
     url: "http://alloy.telemetry.svc.cluster.local:4040"
 
 privateKey:
-  path: "/run/secrets"
-  name: "jwt_private_key"
+  file: "/vault/secrets/jwt-key"
 

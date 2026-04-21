@@ -48,8 +48,7 @@ type (
 	}
 
 	PrivateKey struct {
-		Path string `envconfig:"PRIVATE_KEY_PATH"`
-		Name string `envconfig:"PRIVATE_KEY_NAME"`
+		File string `envconfig:"PRIVATE_KEY_FILE"`
 	}
 
 	Config struct {

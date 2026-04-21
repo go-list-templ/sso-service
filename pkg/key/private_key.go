@@ -3,7 +3,6 @@ package key
 import (
 	"crypto/rsa"
 	"os"
-	"path/filepath"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/golang-jwt/jwt/v5"
@@ -23,9 +22,7 @@ func NewPrivate(cfg *config.PrivateKey) (*Private, error) {
 }
 
 func loadKey(cfg *config.PrivateKey) (*rsa.PrivateKey, error) {
-	pk := filepath.Join(cfg.Path, cfg.Name)
-
-	data, err := os.ReadFile(pk)
+	data, err := os.ReadFile(cfg.File)
 	if err != nil {
 		return nil, err
 	}

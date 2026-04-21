@@ -18,9 +18,9 @@ spec:
         vault.hashicorp.com/role: "sso-service-role"
         vault.hashicorp.com/agent-inject-secret-jwt-key: "secret/data/sso-service/jwt"
         vault.hashicorp.com/agent-inject-template-jwt-key: |
-          {{- with secret "secret/data/sso-service/jwt" -}}
-          {{ .Data.data.private_key }}
-          {{- end -}}
+          {{`{{- with secret "secret/data/sso-service/jwt" -}}` }}
+          {{`{{ .Data.data.private_key }}` }}
+          {{`{{- end -}}` }}
     spec:
       serviceAccountName: {{ .Chart.Name }}
       imagePullSecrets:

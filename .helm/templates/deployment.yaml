@@ -13,16 +13,21 @@ spec:
     metadata:
       labels:
         app: {{ .Chart.Name }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "sso-service-role"
+        vault.hashicorp.com/agent-inject-secret-jwt-key: "secret/data/sso-service/jwt"
+        vault.hashicorp.com/agent-inject-template-jwt-key: |
+          {{- with secret "secret/data/sso-service/jwt" -}}
+          {{ .Data.data.private_key }}
+          {{- end -}}
     spec:
+      serviceAccountName: {{ .Chart.Name }}
       imagePullSecrets:
         - name: registrysecret
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.werf.image.app }}
-          volumeMounts:
-            - name: jwt-secret-volume
-              mountPath: {{ .Values.privateKey.path }}
-              readOnly: true
           ports:
             - name: {{ .Values.app.grpc.name }}
               containerPort: {{ .Values.app.grpc.port }}
@@ -51,7 +56,3 @@ spec:
             limits:
               cpu: {{ $.Values.app.limits.cpu }}
               memory: {{ $.Values.app.limits.memory }}
-      volumes:
-        - name: jwt-secret-volume
-          secret:
-            secretName: jwt-secret

@@ -54,6 +54,10 @@ telemetry:
   pyroscope:
     url: "http://alloy.telemetry.svc.cluster.local:4040"
 
+vault:
+  role: "sso-service-role"
+  url: "http://vault.vault.svc.cluster.local:8200"
+
 privateKey:
   file: "/vault/secrets/jwt-key"
 

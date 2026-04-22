@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   annotations:
-    werf.io/weight: "20"
+    werf.io/weight: "30"
 spec:
   replicas: {{ .Values.app.replicas }}
   selector:
@@ -23,7 +23,7 @@ spec:
           {{`{{ .Data.data.private_key }}` }}
           {{`{{- end -}}` }}
     spec:
-      serviceAccountName: {{ .Chart.Name }}
+      serviceAccountName: {{ .Chart.Name }}-sa
       imagePullSecrets:
         - name: registrysecret
       containers:

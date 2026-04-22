@@ -77,6 +77,12 @@ werf kubectl port-forward svc/sso-service 8080:8080 -n sso-service
 werf kubectl port-forward svc/sso-service 8081:8081 -n sso-service
 ```
 
+Get events in kuber
+
+```bash
+kubectl get events -n sso-service --sort-by='.lastTimestamp'
+```
+
 Delete all images from container registry (token with rules on write+delete packages)
 
 ```bash

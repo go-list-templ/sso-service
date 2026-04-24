@@ -13,15 +13,6 @@ spec:
     metadata:
       labels:
         app: {{ .Chart.Name }}
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: {{ .Values.vault.role }}
-        vault.hashicorp.com/auth-config-vault-address: {{ .Values.vault.url }}
-        vault.hashicorp.com/agent-inject-secret-jwt-key: "secret/data/sso-service/jwt"
-        vault.hashicorp.com/agent-inject-template-jwt-key: |
-          {{`{{- with secret "secret/data/sso-service/jwt" -}}` }}
-          {{`{{ .Data.data.private_key }}` }}
-          {{`{{- end -}}` }}
     spec:
       serviceAccountName: {{ .Chart.Name }}-sa
       imagePullSecrets:

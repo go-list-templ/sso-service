@@ -56,7 +56,7 @@ telemetry:
 
 vault:
   role: "sso-service-role"
-  url: "http://vault.vault.svc.cluster.local:8200"
+  url: "http://vault.secrets.svc.cluster.local:8200"
 
 privateKey:
   file: "/vault/secrets/jwt-key"

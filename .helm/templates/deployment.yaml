@@ -27,10 +27,6 @@ spec:
             - name: {{ .Values.app.http.name }}
               containerPort: {{ .Values.app.http.port }}
               protocol: {{ .Values.app.http.protocol }}
-          volumeMounts:
-            - name: vault-secrets
-              mountPath: {{ .Values.privateKey.file }}
-              readOnly: true
           startupProbe:
             httpGet:
               path: /healthz
@@ -52,10 +48,3 @@ spec:
             limits:
               cpu: {{ $.Values.app.limits.cpu }}
               memory: {{ $.Values.app.limits.memory }}
-      volumes:
-        - name: vault-secrets
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "vault-secrets"

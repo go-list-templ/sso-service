@@ -4,6 +4,26 @@ metadata:
   name: {{ .Chart.Name }}
   annotations:
     werf.io/weight: "30"
+
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: {{ .Values.vault.role }}
+    vault.hashicorp.com/auth-config-vault-address: {{ .Values.vault.url }}
+    vault.hashicorp.com/agent-inject-secret-jwt-keys.json: "secret/data/sso/jwt"
+    vault.hashicorp.com/agent-inject-template-jwt-keys.json: |
+      {{`{{- with secret "secret/data/sso/jwt" -}}` }}
+      {
+        "current": {
+          "kid": {{`"{{ .Data.data.kid }}"` }},
+          "key": {{`"{{ .Data.data.key }}"` }}
+        },
+        "versions": [
+          {
+            "kid": {{`"{{ .Data.data.kid }}"` }},
+            "key": {{`"{{ .Data.data.key }}"` }}
+          }
+        ]
+      }
+      {{`{{- end -}}` }}
 spec:
   replicas: {{ .Values.app.replicas }}
   selector:

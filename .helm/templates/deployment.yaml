@@ -17,9 +17,9 @@ spec:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: {{ .Values.vault.role }}
         vault.hashicorp.com/auth-config-vault-address: {{ .Values.vault.url }}
-        vault.hashicorp.com/agent-inject-secret-jwt-keys.json: "secret/data/sso/jwt"
+        vault.hashicorp.com/agent-inject-secret-jwt-keys.json: "kvv2/data/sso/jwt"
         vault.hashicorp.com/agent-inject-template-jwt-keys.json: |
-          {{`{{- with secret "secret/data/sso/jwt" -}}` }}
+          {{`{{- with secret "kvv2/data/sso/jwt" -}}` }}
           {
             "current": {
               "kid": {{`"{{ .Data.data.kid }}"` }},

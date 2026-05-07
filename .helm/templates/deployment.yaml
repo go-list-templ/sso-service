@@ -19,27 +19,25 @@ spec:
         vault.hashicorp.com/auth-config-vault-address: {{ .Values.vault.url }}
         vault.hashicorp.com/agent-inject-secret-jwt-keys.json: "kvv2/data/sso/jwt"
         vault.hashicorp.com/agent-inject-template-jwt-keys.json: |
-          {{`{{- with secret "kvv2/metadata/sso/jwt" -}}` }}
+          {{ `{{- with secret "kvv2/metadata/sso/jwt" -}}` }}
           {
-            "current_version": {{`{{ .Data.current_version }}` }},
+            "current_version": {{ `{{ .Data.current_version }}` }},
             "versions": [
-              {{`{{- $first := true -}}` }}
-              {{`{{- range $version, $metadata := .Data.versions -}}` }}
-                {{`{{- if not $metadata.deletion_time -}}` }}
-                  {{`{{- with secret (printf "kvv2/data/sso/jwt?version=%s" $version) -}}` }}
-                    {{`{{- if not $first -}},{{- end -}}` }}
-                    {
-                      "version_id": {{`{{ $version }}` }},
-                      "kid": {{`"{{ .Data.data.kid }}"` }},
-                      "key": {{`"{{ .Data.data.key }}"` }}
-                    }
-                    {{`{{- $first = false -}}` }}
-                  {{`{{- end -}}` }}
-                {{`{{- end -}}` }}
-              {{`{{- end -}}` }}
+              {{ `{{- range $version, $metadata := .Data.versions -}}` }}
+              {{ `{{- if not $metadata.deletion_time -}}` }}
+              {{ `{{- with secret (printf "kvv2/data/sso/jwt?version=%s" $version) -}}` }}
+              {
+                "version": {{ `{{ $version }}` }},
+                "private_key": {{ `{{ .Data.data.key | toJSON }}` }},
+                "public_key": "example"
+              },
+              {{ `{{- end -}}` }}
+              {{ `{{- end -}}` }}
+              {{ `{{- end -}}` }}
+              null
             ]
           }
-          {{`{{- end -}}` }}
+          {{ `{{- end -}}` }}
     spec:
       serviceAccountName: {{ .Chart.Name }}-sa
       imagePullSecrets:

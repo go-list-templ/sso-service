@@ -26,11 +26,13 @@ spec:
               {{ `{{- range $version, $metadata := .Data.versions -}}` }}
               {{ `{{- if not $metadata.deletion_time -}}` }}
               {{ `{{- with secret (printf "kvv2/data/sso/jwt?version=%s" $version) -}}` }}
+              {{ `{{- if .Data.data -}}` }}
               {
                 "version": {{ `{{ $version }}` }},
                 "private_key": {{ `{{ .Data.data.key | toJSON }}` }},
                 "public_key": "example"
               },
+              {{ `{{- end -}}` }}
               {{ `{{- end -}}` }}
               {{ `{{- end -}}` }}
               {{ `{{- end -}}` }}

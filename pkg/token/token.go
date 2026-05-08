@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
-	"github.com/go-list-templ/sso-service/pkg/key"
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 )
@@ -24,13 +23,12 @@ var (
 )
 
 type Token struct {
-	cfg        *config.Config
-	logger     *zap.Logger
-	privateKey *key.Private
+	cfg    *config.Config
+	logger *zap.Logger
 }
 
-func NewToken(cfg *config.Config, l *zap.Logger, p *key.Private) *Token {
-	return &Token{cfg, l, p}
+func NewToken(cfg *config.Config, l *zap.Logger) *Token {
+	return &Token{cfg, l}
 }
 
 func (t *Token) CreateAccess() (string, error) {
@@ -46,7 +44,7 @@ func (t *Token) CreateAccess() (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	return token.SignedString(t.privateKey.PrivateKey)
+	return token.SignedString("")
 }
 
 func (t *Token) CreateRefresh() (string, error) {
@@ -62,7 +60,7 @@ func (t *Token) CreateRefresh() (string, error) {
 }
 
 func (t *Token) keyFunc() jwt.Keyfunc {
-	return func(_ *jwt.Token) (interface{}, error) { return t.privateKey.PrivateKey, nil }
+	return func(_ *jwt.Token) (interface{}, error) { return "", nil }
 }
 
 func (t *Token) verifyAccess(accessToken string) error {

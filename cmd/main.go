@@ -19,6 +19,7 @@ import (
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/go-list-templ/sso-service/pkg/otel"
 	"github.com/go-list-templ/sso-service/pkg/token"
+	"github.com/go-list-templ/sso-service/pkg/vault"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 )
@@ -73,9 +74,16 @@ func run() error {
 		logger.Panic("init user client", zap.Error(err))
 	}
 
+	logger.Info("initializing vault client")
+
+	vaultClient, err := vault.New()
+	if err != nil {
+		logger.Panic("init vault client", zap.Error(err))
+	}
+
 	logger.Info("initializing pkg token")
 
-	tk := token.NewToken(cfg, logger.With(zap.String("module", "token")))
+	tk := token.NewToken(cfg, logger.With(zap.String("module", "token")), vaultClient)
 
 	logger.Info("initializing services")
 

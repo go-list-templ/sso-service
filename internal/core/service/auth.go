@@ -44,7 +44,7 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	accessToken, err := a.token.CreateAccess()
+	accessToken, err := a.token.CreateAccess(ctx)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

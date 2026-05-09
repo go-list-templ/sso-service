@@ -1,6 +1,7 @@
 package token
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
@@ -34,7 +35,7 @@ func NewToken(cfg *config.Config, l *zap.Logger, v *vault.Vault) *Token {
 	return &Token{cfg, l, v}
 }
 
-func (t *Token) CreateAccess() (string, error) {
+func (t *Token) CreateAccess(ctx context.Context) (string, error) {
 	now := time.Now()
 
 	claims := jwt.MapClaims{
@@ -53,7 +54,7 @@ func (t *Token) CreateAccess() (string, error) {
 		return "", err
 	}
 
-	signature, err := t.signWithVault(unsignedToken)
+	signature, err := t.signWithVault(ctx, unsignedToken)
 	if err != nil {
 		return "", fmt.Errorf("vault sign error: %w", err)
 	}
@@ -61,7 +62,7 @@ func (t *Token) CreateAccess() (string, error) {
 	return fmt.Sprintf("%s.%s", unsignedToken, signature), nil
 }
 
-func (t *Token) signWithVault(unsignedToken string) (string, error) {
+func (t *Token) signWithVault(ctx context.Context, unsignedToken string) (string, error) {
 	path := "transit/sign/sso-service-keys"
 
 	data := map[string]interface{}{
@@ -69,7 +70,7 @@ func (t *Token) signWithVault(unsignedToken string) (string, error) {
 		"marshaling_algorithm": "jws",
 	}
 
-	secret, err := t.vault.Logical().Write(path, data)
+	secret, err := t.vault.Logical().WriteWithContext(ctx, path, data)
 	if err != nil {
 		return "", err
 	}

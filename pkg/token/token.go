@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/go-list-templ/sso-service/pkg/vault"
+	"strings"
 	"time"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
@@ -25,10 +27,11 @@ var (
 type Token struct {
 	cfg    *config.Config
 	logger *zap.Logger
+	vault  *vault.Vault
 }
 
-func NewToken(cfg *config.Config, l *zap.Logger) *Token {
-	return &Token{cfg, l}
+func NewToken(cfg *config.Config, l *zap.Logger, v *vault.Vault) *Token {
+	return &Token{cfg, l, v}
 }
 
 func (t *Token) CreateAccess() (string, error) {
@@ -44,7 +47,39 @@ func (t *Token) CreateAccess() (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	return token.SignedString("")
+
+	unsignedToken, err := token.SigningString()
+	if err != nil {
+		return "", err
+	}
+
+	signature, err := t.signWithVault(unsignedToken)
+	if err != nil {
+		return "", fmt.Errorf("vault sign error: %w", err)
+	}
+
+	return fmt.Sprintf("%s.%s", unsignedToken, signature), nil
+}
+
+func (t *Token) signWithVault(unsignedToken string) (string, error) {
+	path := "transit/sign/sso-service-keys"
+
+	data := map[string]interface{}{
+		"input":                base64.StdEncoding.EncodeToString([]byte(unsignedToken)),
+		"marshaling_algorithm": "jws",
+	}
+
+	secret, err := t.vault.Logical().Write(path, data)
+	if err != nil {
+		return "", err
+	}
+
+	rawSignature := secret.Data["signature"].(string)
+
+	parts := strings.Split(rawSignature, ":")
+	finalSignature := parts[len(parts)-1]
+
+	return finalSignature, nil
 }
 
 func (t *Token) CreateRefresh() (string, error) {

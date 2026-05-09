@@ -13,31 +13,6 @@ spec:
     metadata:
       labels:
         app: {{ .Chart.Name }}
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: {{ .Values.vault.role }}
-        vault.hashicorp.com/auth-config-vault-address: {{ .Values.vault.url }}
-        vault.hashicorp.com/agent-inject-secret-jwt-keys.json: "kvv2/data/sso-service/keys"
-        vault.hashicorp.com/agent-inject-template-jwt-keys.json: |
-          {{ `{{- with secret "kvv2/metadata/sso-service/keys" -}}` }}
-          {
-            "current_version": {{ `{{ .Data.current_version }}` }},
-            "versions": [
-              {{ `{{- range $version, $metadata := .Data.versions -}}` }}
-              {{ `{{- with secret (printf "kvv2/data/sso-service/keys?version=%s" $version) -}}` }}
-              {{ `{{- if .Data.data -}}` }}
-              {
-                "version": {{ `{{ $version }}` }},
-                "private_key": {{ `{{ .Data.data.private_key | toJSON }}` }},
-                "public_key": {{ `{{ .Data.data.public_key | toJSON }}` }}
-              },
-              {{ `{{- end -}}` }}
-              {{ `{{- end -}}` }}
-              {{ `{{- end -}}` }}
-              null
-            ]
-          }
-          {{ `{{- end -}}` }}
     spec:
       serviceAccountName: {{ .Chart.Name }}-sa
       imagePullSecrets:

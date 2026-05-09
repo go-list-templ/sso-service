@@ -7,6 +7,7 @@ import (
 	auth "github.com/hashicorp/vault/api/auth/kubernetes"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"net/http"
+	"strings"
 )
 
 type Vault struct {
@@ -19,7 +20,12 @@ func New() (*Vault, error) {
 	//todo add address from cfg
 	config.Address = "http://vault.secrets.svc.cluster.local:8200"
 
-	config.HttpClient.Transport = otelhttp.NewTransport(http.DefaultTransport)
+	config.HttpClient.Transport = otelhttp.NewTransport(
+		http.DefaultTransport,
+		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+			return fmt.Sprintf("vault.%s.%s", strings.ToLower(r.Method), strings.ToLower(r.URL.Path))
+		}),
+	)
 
 	client, err := api.NewClient(config)
 	if err != nil {

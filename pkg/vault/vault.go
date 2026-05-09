@@ -3,17 +3,19 @@ package vault
 import (
 	"context"
 	"fmt"
-	"os"
-
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/kubernetes"
 )
 
-func NewVaultClient() (*api.Client, error) {
+type Vault struct {
+	*api.Client
+}
+
+func New() (*Vault, error) {
 	config := api.DefaultConfig()
 
 	//todo add address from cfg
-	config.Address = os.Getenv("VAULT_ADDR")
+	config.Address = "http://vault.secrets.svc.cluster.local:8200"
 
 	client, err := api.NewClient(config)
 	if err != nil {
@@ -37,5 +39,5 @@ func NewVaultClient() (*api.Client, error) {
 		return nil, fmt.Errorf("no auth info returned")
 	}
 
-	return client, nil
+	return &Vault{client}, nil
 }

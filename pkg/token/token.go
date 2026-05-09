@@ -35,6 +35,9 @@ func NewToken(cfg *config.Config, l *zap.Logger, v *vault.Vault) *Token {
 	return &Token{cfg, l, v}
 }
 
+// todo split on two methods - 1 for create unsignedToken, 2 for split token with signature
+// todo use two method after created in service
+
 func (t *Token) CreateAccess(ctx context.Context) (string, error) {
 	now := time.Now()
 
@@ -54,7 +57,7 @@ func (t *Token) CreateAccess(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	signature, err := t.signWithVault(ctx, unsignedToken)
+	signature, err := t.SignJWT(ctx, unsignedToken)
 	if err != nil {
 		return "", fmt.Errorf("vault sign error: %w", err)
 	}
@@ -62,7 +65,10 @@ func (t *Token) CreateAccess(ctx context.Context) (string, error) {
 	return fmt.Sprintf("%s.%s", unsignedToken, signature), nil
 }
 
-func (t *Token) signWithVault(ctx context.Context, unsignedToken string) (string, error) {
+// todo put method in adapter http/client/vault.go
+// todo use method in service after createUnsignedToken method
+
+func (t *Token) SignJWT(ctx context.Context, unsignedToken string) (string, error) {
 	path := "transit/sign/sso-service-keys"
 
 	data := map[string]interface{}{

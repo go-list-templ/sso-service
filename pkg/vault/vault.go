@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+// todo put all logic in http/client/vault.go
+// todo add logger
+
 type Vault struct {
 	*api.Client
 }
@@ -35,6 +38,7 @@ func New() (*Vault, error) {
 	//todo add address from cfg
 	k8sAuth, err := auth.NewKubernetesAuth(
 		"sso-service-role",
+		// todo maybe get path to token from helm params...
 		auth.WithServiceAccountTokenPath("/var/run/secrets/kubernetes.io/serviceaccount/token"),
 	)
 	if err != nil {

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/kubernetes"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"net/http"
 )
 
 type Vault struct {
@@ -16,6 +18,8 @@ func New() (*Vault, error) {
 
 	//todo add address from cfg
 	config.Address = "http://vault.secrets.svc.cluster.local:8200"
+
+	config.HttpClient.Transport = otelhttp.NewTransport(http.DefaultTransport)
 
 	client, err := api.NewClient(config)
 	if err != nil {

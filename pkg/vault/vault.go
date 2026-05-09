@@ -35,6 +35,7 @@ func New() (*Vault, error) {
 		return nil, fmt.Errorf("unable to initialize k8s auth: %w", err)
 	}
 
+	//todo add ctx in 5 second
 	authInfo, err := client.Auth().Login(context.Background(), k8sAuth)
 	if err != nil {
 		return nil, fmt.Errorf("unable to log in to k8s auth: %w", err)

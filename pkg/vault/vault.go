@@ -3,55 +3,81 @@ package vault
 import (
 	"context"
 	"fmt"
+	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/kubernetes"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
+	"time"
 )
 
-// todo put all logic in http/client/vault.go
-// todo add logger
+const (
+	DefaultConnAttempts   = 10
+	DefaultConnTimeout    = time.Second
+	DefaultContextTimeout = 5 * time.Second
+)
 
 type Vault struct {
 	*api.Client
 }
 
-func New() (*Vault, error) {
-	config := api.DefaultConfig()
+func New(cfg *config.Vault, logger *zap.Logger) (*Vault, error) {
+	var err error
 
-	//todo add address from cfg
-	config.Address = "http://vault.secrets.svc.cluster.local:8200"
+	apiConfig := api.DefaultConfig()
 
-	config.HttpClient.Transport = otelhttp.NewTransport(
+	apiConfig.Address = cfg.URL
+
+	apiConfig.HttpClient.Transport = otelhttp.NewTransport(
 		http.DefaultTransport,
 		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
 			return fmt.Sprintf("vault.%s.%s", strings.ToLower(r.Method), strings.ToLower(r.URL.Path))
 		}),
 	)
 
-	client, err := api.NewClient(config)
-	if err != nil {
-		return nil, err
+	connAttempts := DefaultConnAttempts
+	connTimeout := DefaultConnTimeout
+
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
+	defer cancel()
+
+	client := &api.Client{}
+
+	for connAttempts > 0 {
+		client, err = api.NewClient(apiConfig)
+		if err != nil {
+			logger.Warn("new client", zap.Error(err))
+		}
+
+		k8sAuth, err := auth.NewKubernetesAuth(
+			cfg.Role,
+			// todo maybe get path to token from helm params...
+			auth.WithServiceAccountTokenPath("/var/run/secrets/kubernetes.io/serviceaccount/token"),
+		)
+		if err != nil {
+			logger.Warn("k8s auth", zap.Error(err))
+		}
+
+		authInfo, err := client.Auth().Login(ctx, k8sAuth)
+		if err != nil {
+			logger.Warn("login", zap.Error(err))
+		}
+
+		if authInfo != nil {
+			break
+		}
+
+		logger.Warn("trying to connect", zap.Int("attempts", connAttempts), zap.Error(err))
+
+		time.Sleep(connTimeout)
+
+		connAttempts--
 	}
 
-	//todo add address from cfg
-	k8sAuth, err := auth.NewKubernetesAuth(
-		"sso-service-role",
-		// todo maybe get path to token from helm params...
-		auth.WithServiceAccountTokenPath("/var/run/secrets/kubernetes.io/serviceaccount/token"),
-	)
 	if err != nil {
-		return nil, fmt.Errorf("unable to initialize k8s auth: %w", err)
-	}
-
-	//todo add ctx in 5 second
-	authInfo, err := client.Auth().Login(context.Background(), k8sAuth)
-	if err != nil {
-		return nil, fmt.Errorf("unable to log in to k8s auth: %w", err)
-	}
-	if authInfo == nil {
-		return nil, fmt.Errorf("no auth info returned")
+		return nil, fmt.Errorf("end attempts exceeded: %w", err)
 	}
 
 	return &Vault{client}, nil

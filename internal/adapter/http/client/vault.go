@@ -47,7 +47,7 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (string, erro
 	rawSignature := secret.Data["signature"].(string)
 
 	parts := strings.Split(rawSignature, ":")
-	finalSignature := parts[len(parts)-1]
+	signature := parts[len(parts)-1]
 
-	return finalSignature, nil
+	return signature, nil
 }

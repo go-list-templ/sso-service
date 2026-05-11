@@ -32,3 +32,7 @@ data:
   OTEL_TIMEOUT: {{ .Values.telemetry.collector.timeout | quote }}
 
   PRIVATE_KEY_FILE: {{ .Values.privateKey.file | quote }}
+
+  VAULT_URL: {{ .Values.vault.url | quote }}
+  VAULT_ROLE: {{ .Values.vault.role | quote }}
+  VAULT_TRANSIT_NAME: {{ .Values.vault.transitName | quote }}

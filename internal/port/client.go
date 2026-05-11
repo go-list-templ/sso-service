@@ -15,6 +15,6 @@ type (
 	}
 
 	VaultClient interface {
-		SignatureJWT(ctx context.Context, unsignedToken string) (string, error)
+		SignJWT(ctx context.Context, unsignedToken string) (string, error)
 	}
 )

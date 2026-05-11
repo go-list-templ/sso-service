@@ -50,7 +50,7 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	signature, err := a.vaultClient.SignatureJWT(ctx, unsignedToken)
+	signature, err := a.vaultClient.SignJWT(ctx, unsignedToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

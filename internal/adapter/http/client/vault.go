@@ -29,7 +29,7 @@ func RegisterVault(c *config.Vault, v *vault.Vault, l *zap.Logger) *Vault {
 	}
 }
 
-func (v *Vault) SignatureJWT(ctx context.Context, unsignedToken string) (string, error) {
+func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (string, error) {
 	path := filepath.Join(SignPath, v.cfg.TransitName)
 
 	data := map[string]any{

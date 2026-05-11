@@ -13,4 +13,8 @@ type (
 		Create(context.Context, dto.UserCreateInput) (dto.UserCreateOutput, error)
 		VerifyCred(context.Context, dto.UserVerifyCredInput) (dto.UserVerifyCredOutput, error)
 	}
+
+	VaultClient interface {
+		SignatureJWT(ctx context.Context, unsignedToken string) (string, error)
+	}
 )

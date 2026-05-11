@@ -45,12 +45,7 @@ func (t *Token) Unsigned() (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
-	unsignedToken, err := token.SigningString()
-	if err != nil {
-		return "", err
-	}
-
-	return unsignedToken, nil
+	return token.SigningString()
 }
 
 func (t *Token) CreateAccess(unsignedToken, signature string) (string, error) {

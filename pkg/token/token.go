@@ -65,30 +65,6 @@ func (t *Token) CreateAccess(ctx context.Context) (string, error) {
 	return fmt.Sprintf("%s.%s", unsignedToken, signature), nil
 }
 
-// todo put method in adapter http/client/vault.go
-// todo use method in service after createUnsignedToken method
-
-func (t *Token) SignJWT(ctx context.Context, unsignedToken string) (string, error) {
-	path := "transit/sign/sso-service-keys"
-
-	data := map[string]interface{}{
-		"input":                base64.StdEncoding.EncodeToString([]byte(unsignedToken)),
-		"marshaling_algorithm": "jws",
-	}
-
-	secret, err := t.vault.Logical().WriteWithContext(ctx, path, data)
-	if err != nil {
-		return "", err
-	}
-
-	rawSignature := secret.Data["signature"].(string)
-
-	parts := strings.Split(rawSignature, ":")
-	finalSignature := parts[len(parts)-1]
-
-	return finalSignature, nil
-}
-
 func (t *Token) CreateRefresh() (string, error) {
 	b := make([]byte, LengthRefreshToken)
 	_, err := rand.Read(b)

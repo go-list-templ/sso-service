@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/go-list-templ/sso-service/pkg/vault"
 	"time"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
@@ -26,11 +25,10 @@ var (
 type Token struct {
 	cfg    *config.Config
 	logger *zap.Logger
-	vault  *vault.Vault
 }
 
-func NewToken(cfg *config.Config, l *zap.Logger, v *vault.Vault) *Token {
-	return &Token{cfg, l, v}
+func NewToken(cfg *config.Config, l *zap.Logger) *Token {
+	return &Token{cfg, l}
 }
 
 func (t *Token) Unsigned() (string, error) {

@@ -36,3 +36,4 @@ data:
   VAULT_URL: {{ .Values.vault.url | quote }}
   VAULT_ROLE: {{ .Values.vault.role | quote }}
   VAULT_TRANSIT_NAME: {{ .Values.vault.transitName | quote }}
+  VAULT_SA_TOKEN_PATH: {{ .Values.vault.saTokenPath | quote}}

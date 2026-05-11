@@ -58,6 +58,7 @@ vault:
   role: "sso-service-role"
   url: "http://vault.secrets.svc.cluster.local:8200"
   transitName: "sso-service-keys"
+  saTokenPath: "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
 privateKey:
   file: "/vault/secrets/jwt-keys.json"

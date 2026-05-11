@@ -1,13 +1,11 @@
 package token
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/go-list-templ/sso-service/pkg/vault"
-	"strings"
 	"time"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
@@ -35,10 +33,7 @@ func NewToken(cfg *config.Config, l *zap.Logger, v *vault.Vault) *Token {
 	return &Token{cfg, l, v}
 }
 
-// todo split on two methods - 1 for create unsignedToken, 2 for split token with signature
-// todo use two method after created in service
-
-func (t *Token) CreateAccess(ctx context.Context) (string, error) {
+func (t *Token) Unsigned() (string, error) {
 	now := time.Now()
 
 	claims := jwt.MapClaims{
@@ -57,11 +52,10 @@ func (t *Token) CreateAccess(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	signature, err := t.SignJWT(ctx, unsignedToken)
-	if err != nil {
-		return "", fmt.Errorf("vault sign error: %w", err)
-	}
+	return unsignedToken, nil
+}
 
+func (t *Token) CreateAccess(unsignedToken, signature string) (string, error) {
 	return fmt.Sprintf("%s.%s", unsignedToken, signature), nil
 }
 

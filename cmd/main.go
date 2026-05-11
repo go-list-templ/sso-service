@@ -10,6 +10,7 @@ import (
 	grpclient "github.com/go-list-templ/sso-service/internal/adapter/grpc/client"
 	grpcserver "github.com/go-list-templ/sso-service/internal/adapter/grpc/server"
 	grpchandler "github.com/go-list-templ/sso-service/internal/adapter/grpc/server/handler"
+	httpclient "github.com/go-list-templ/sso-service/internal/adapter/http/client"
 	httpserver "github.com/go-list-templ/sso-service/internal/adapter/http/server"
 	httphandler "github.com/go-list-templ/sso-service/internal/adapter/http/server/handler"
 	mongorepo "github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo/repo"
@@ -67,27 +68,29 @@ func run() error {
 
 	authMongoRepo := mongorepo.NewSession(mdb, logger.With(zap.String("module", "mongo auth repo")))
 
+	logger.Info("initializing pkg token")
+
+	tk := token.NewToken(cfg, logger.With(zap.String("module", "token")))
+
+	logger.Info("initializing pkg vault")
+
+	va, err := vault.New(&cfg.Vault, logger.With(zap.String("module", "vault")))
+	if err != nil {
+		logger.Panic("init vault", zap.Error(err))
+	}
+
 	logger.Info("initializing clients")
 
-	userClient, err := grpclient.RegisterUser(&cfg.UserClient, logger.With(zap.String("module", "user client")))
+	vaultClt := httpclient.RegisterVault(&cfg.Vault, va, logger.With(zap.String("module", "vault client")))
+
+	userClt, err := grpclient.RegisterUser(&cfg.UserClient, logger.With(zap.String("module", "user client")))
 	if err != nil {
 		logger.Panic("init user client", zap.Error(err))
 	}
 
-	logger.Info("initializing vault client")
-
-	vaultClient, err := vault.New()
-	if err != nil {
-		logger.Panic("init vault client", zap.Error(err))
-	}
-
-	logger.Info("initializing pkg token")
-
-	tk := token.NewToken(cfg, logger.With(zap.String("module", "token")), vaultClient)
-
 	logger.Info("initializing services")
 
-	authService := service.NewAuth(authMongoRepo, userClient, tk)
+	authService := service.NewAuth(userClt, vaultClt, authMongoRepo, tk)
 
 	logger.Info("initializing servers")
 

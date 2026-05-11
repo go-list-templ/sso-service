@@ -53,8 +53,7 @@ func New(cfg *config.Vault, logger *zap.Logger) (*Vault, error) {
 
 		k8sAuth, err := auth.NewKubernetesAuth(
 			cfg.Role,
-			// todo maybe get path to token from helm params...
-			auth.WithServiceAccountTokenPath("/var/run/secrets/kubernetes.io/serviceaccount/token"),
+			auth.WithServiceAccountTokenPath(cfg.SATokenPath),
 		)
 		if err != nil {
 			logger.Warn("k8s auth", zap.Error(err))

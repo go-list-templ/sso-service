@@ -10,13 +10,14 @@ import (
 )
 
 type Auth struct {
-	repo       port.SessionRepo
-	userClient port.UserClient
-	token      *token.Token
+	userClient  port.UserClient
+	vaultClient port.VaultClient
+	repo        port.SessionRepo
+	token       *token.Token
 }
 
-func NewAuth(a port.SessionRepo, u port.UserClient, t *token.Token) *Auth {
-	return &Auth{a, u, t}
+func NewAuth(u port.UserClient, v port.VaultClient, r port.SessionRepo, t *token.Token) *Auth {
+	return &Auth{u, v, r, t}
 }
 
 func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, error) {
@@ -44,7 +45,17 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	accessToken, err := a.token.CreateAccess(ctx)
+	unsignedToken, err := a.token.Unsigned()
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	signature, err := a.vaultClient.SignatureJWT(ctx, unsignedToken)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	accessToken, err := a.token.CreateAccess(unsignedToken, signature)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

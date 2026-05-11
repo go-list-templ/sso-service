@@ -47,8 +47,10 @@ type (
 		Timeout           time.Duration `envconfig:"OTEL_TIMEOUT"`
 	}
 
-	PrivateKey struct {
-		File string `envconfig:"PRIVATE_KEY_FILE"`
+	Vault struct {
+		TransitName string `envconfig:"VAULT_TRANSIT_NAME"`
+		URL         string `envconfig:"VAULT_URL"`
+		Role        string `envconfig:"VAULT_ROLE"`
 	}
 
 	Config struct {
@@ -57,7 +59,7 @@ type (
 		UserClient UserClient
 		DB         DB
 		Otel       Otel
-		PrivateKey PrivateKey
+		Vault      Vault
 	}
 )
 

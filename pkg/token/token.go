@@ -53,15 +53,7 @@ func (t *Token) CreateAccess(unsignedToken, signature string) (string, error) {
 		return "", errors.New("invalid token components")
 	}
 
-	accessToken := unsignedToken + "." + signature
-
-	parser := jwt.NewParser()
-	_, _, err := parser.ParseUnverified(accessToken, jwt.MapClaims{})
-	if err != nil {
-		return "", fmt.Errorf("generated token is invalid: %w", err)
-	}
-
-	return accessToken, nil
+	return unsignedToken + "." + signature, nil
 }
 
 func (t *Token) CreateRefresh() (string, error) {

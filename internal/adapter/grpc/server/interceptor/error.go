@@ -15,6 +15,7 @@ const ErrInternalServer = "internal server"
 var allErr = map[error]codes.Code{
 	client.ErrUserExists:          codes.AlreadyExists,
 	client.ErrUserInvalidArgument: codes.InvalidArgument,
+	client.ErrUserNotFound:        codes.NotFound,
 }
 
 func ErrorHandling() grpc.UnaryServerInterceptor {

@@ -75,7 +75,16 @@ func (u *User) VerifyCred(ctx context.Context, input dto.UserVerifyCredInput) (d
 	if err != nil {
 		u.logger.Error("verify cred user", zap.Any("context", ctx), zap.Error(err))
 
-		return dto.UserVerifyCredOutput{}, err
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.InvalidArgument:
+				return dto.UserVerifyCredOutput{}, NewUserInvalidArgument(st.Message(), err)
+			case codes.NotFound:
+				return dto.UserVerifyCredOutput{}, NewUserNotFound(st.Message(), err)
+			default:
+				return dto.UserVerifyCredOutput{}, err
+			}
+		}
 	}
 
 	return dto.UserVerifyCredOutput{

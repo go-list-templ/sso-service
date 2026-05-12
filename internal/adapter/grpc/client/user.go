@@ -79,8 +79,6 @@ func (u *User) VerifyCred(ctx context.Context, input dto.UserVerifyCredInput) (d
 			switch st.Code() {
 			case codes.InvalidArgument:
 				return dto.UserVerifyCredOutput{}, NewUserInvalidArgument(st.Message(), err)
-			case codes.NotFound:
-				return dto.UserVerifyCredOutput{}, NewUserNotFound(st.Message(), err)
 			default:
 				return dto.UserVerifyCredOutput{}, err
 			}

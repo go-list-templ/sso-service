@@ -73,7 +73,7 @@ func (t *Token) CreateRefresh() (string, error) {
 		return "", ErrGenerateToken
 	}
 
-	return base64.URLEncoding.EncodeToString(b), nil
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
 func (t *Token) keyFunc() jwt.Keyfunc {

@@ -67,7 +67,47 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 }
 
 func (a *Auth) Login(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, error) {
-	//todo add verify email from users-service
+	verifyCredInput := dto.UserVerifyCredInput{
+		Email:    input.Email,
+		Password: input.Password,
+	}
 
-	return dto.AuthOutput{}, nil
+	verifyCredOutput, err := a.userClient.VerifyCred(ctx, verifyCredInput)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	refreshToken, err := a.token.CreateRefresh()
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	session, err := entity.NewSession(verifyCredOutput.UserId, refreshToken)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	if err = a.repo.Store(ctx, session); err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	unsignedToken, err := a.token.Unsigned()
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	signature, err := a.vaultClient.SignJWT(ctx, unsignedToken)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	accessToken, err := a.token.CreateAccess(unsignedToken, signature)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	return dto.AuthOutput{
+		AccessToken:  accessToken,
+		RefreshToken: session.RefreshToken,
+	}, nil
 }

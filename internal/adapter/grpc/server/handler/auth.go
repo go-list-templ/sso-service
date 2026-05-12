@@ -45,5 +45,20 @@ func (a *Auth) Register(ctx context.Context, request *v1.RegisterRequest) (*v1.R
 }
 
 func (a *Auth) Login(ctx context.Context, request *v1.LoginRequest) (*v1.LoginResponse, error) {
-	return nil, nil
+	input := dto.AuthInput{
+		Email:    request.GetEmail(),
+		Password: request.GetPassword(),
+	}
+
+	output, err := a.service.Register(ctx, input)
+	if err != nil {
+		a.logger.Warn("login", zap.Any("context", ctx), zap.Error(err))
+
+		return nil, err
+	}
+
+	return &v1.LoginResponse{
+		AccessToken:  output.AccessToken,
+		RefreshToken: output.RefreshToken,
+	}, nil
 }

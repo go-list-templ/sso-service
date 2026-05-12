@@ -50,7 +50,7 @@ func (a *Auth) Login(ctx context.Context, request *v1.LoginRequest) (*v1.LoginRe
 		Password: request.GetPassword(),
 	}
 
-	output, err := a.service.Register(ctx, input)
+	output, err := a.service.Login(ctx, input)
 	if err != nil {
 		a.logger.Warn("login", zap.Any("context", ctx), zap.Error(err))
 

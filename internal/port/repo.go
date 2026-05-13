@@ -11,5 +11,7 @@ import (
 type (
 	SessionRepo interface {
 		Store(context.Context, entity.Session) error
+		Get(context.Context, string) (entity.Session, error)
+		Delete(context.Context, entity.Session) error
 	}
 )

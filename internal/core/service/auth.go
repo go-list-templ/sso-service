@@ -128,9 +128,7 @@ func (a *Auth) Refresh(ctx context.Context, input dto.RefreshInput) (dto.AuthOut
 		return dto.AuthOutput{}, err
 	}
 
-	userId := currentSession.UserID.Value().String()
-
-	session, err := entity.NewSession(userId, refreshToken)
+	session, err := entity.NewSession(currentSession.UserID.Value().String(), refreshToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

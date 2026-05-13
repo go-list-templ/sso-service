@@ -2,13 +2,10 @@ package repo
 
 import (
 	"context"
-	"errors"
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"time"
-
 	"github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo"
 	"github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo/repo/dao"
 	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.uber.org/zap"
 )
 
@@ -23,6 +20,8 @@ type Session struct {
 func NewSession(m *mongo.Mongo, l *zap.Logger) *Session {
 	return &Session{m, l}
 }
+
+//TODO auto delete in mongo after refresh token expired
 
 func (s Session) Store(ctx context.Context, session entity.Session) error {
 	collection := s.Database.Collection(Collection)
@@ -44,19 +43,11 @@ func (s Session) FindAndDelete(ctx context.Context, refreshToken string) (entity
 
 	var sessionDAO dao.Session
 
-	// 2. Ищем и сразу удаляем (чтобы избежать переиспользования того же токена)
 	err := collection.FindOneAndDelete(ctx, filter).Decode(&sessionDAO)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return entity.Session{}, entity.ErrSessionNotFound // Ваша кастомная ошибка
-		}
-		s.logger.Error("delete session error", zap.Error(err))
-		return entity.Session{}, err
-	}
+		s.logger.Error("delete session", zap.Any("ctx", ctx), zap.Error(err))
 
-	// 3. Проверяем не истек ли срок годности
-	if time.Now().After(sessionDAO.ExpiresAt) {
-		return entity.Session{}, entity.ErrSessionExpired // Токен найден, но он протух
+		return entity.Session{}, err
 	}
 
 	return sessionDAO.ToEntity(), nil

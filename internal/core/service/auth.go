@@ -113,12 +113,7 @@ func (a *Auth) Login(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, 
 }
 
 func (a *Auth) Refresh(ctx context.Context, input dto.RefreshInput) (dto.AuthOutput, error) {
-	currentSession, err := a.repo.Get(ctx, input.AccessToken)
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	err = a.repo.Delete(ctx, currentSession)
+	currentSession, err := a.repo.FindAndDelete(ctx, input.AccessToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

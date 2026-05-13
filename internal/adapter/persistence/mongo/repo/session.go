@@ -34,10 +34,13 @@ func (s Session) Store(ctx context.Context, session entity.Session) error {
 	return err
 }
 
-func (s Session) Get(ctx context.Context, accessToken string) (entity.Session, error) {
-	return entity.Session{}, nil
-}
+func (s Session) FindAndDelete(ctx context.Context, accessToken string) (entity.Session, error) {
+	collection := s.Database.Collection(Collection)
 
-func (s Session) Delete(ctx context.Context, session entity.Session) error {
-	return nil
+	_, err := collection.FindOneAndDelete(ctx, sessionDAO)
+	if err != nil {
+		s.logger.Error("insert session", zap.Any("ctx", ctx), zap.Error(err))
+	}
+
+	return entity.Session{}, nil
 }

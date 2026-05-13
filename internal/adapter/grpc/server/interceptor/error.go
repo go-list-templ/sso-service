@@ -3,6 +3,7 @@ package interceptor
 import (
 	"context"
 	"errors"
+	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 
 	"github.com/go-list-templ/sso-service/internal/adapter/grpc/client"
 	"google.golang.org/grpc"
@@ -15,6 +16,7 @@ const ErrInternalServer = "internal server"
 var allErr = map[error]codes.Code{
 	client.ErrUserExists:          codes.AlreadyExists,
 	client.ErrUserInvalidArgument: codes.InvalidArgument,
+	entityerr.ErrSessionExpired:   codes.Unauthenticated,
 }
 
 func ErrorHandling() grpc.UnaryServerInterceptor {

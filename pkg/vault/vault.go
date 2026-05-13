@@ -3,14 +3,16 @@ package vault
 import (
 	"context"
 	"fmt"
-	"github.com/go-list-templ/sso-service/pkg/config"
-	"github.com/hashicorp/vault/api"
-	auth "github.com/hashicorp/vault/api/auth/kubernetes"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
+
+	auth "github.com/hashicorp/vault/api/auth/kubernetes"
+
+	"github.com/go-list-templ/sso-service/pkg/config"
+	"github.com/hashicorp/vault/api"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.uber.org/zap"
 )
 
 const (
@@ -43,28 +45,22 @@ func New(cfg *config.Vault, logger *zap.Logger) (*Vault, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultContextTimeout)
 	defer cancel()
 
-	client := &api.Client{}
+	client, err := api.NewClient(apiConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	k8sAuth, err := auth.NewKubernetesAuth(
+		cfg.Role,
+		auth.WithServiceAccountTokenPath(cfg.SATokenPath),
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	for connAttempts > 0 {
-		client, err = api.NewClient(apiConfig)
-		if err != nil {
-			logger.Warn("new client", zap.Error(err))
-		}
-
-		k8sAuth, err := auth.NewKubernetesAuth(
-			cfg.Role,
-			auth.WithServiceAccountTokenPath(cfg.SATokenPath),
-		)
-		if err != nil {
-			logger.Warn("k8s auth", zap.Error(err))
-		}
-
-		authInfo, err := client.Auth().Login(ctx, k8sAuth)
-		if err != nil {
-			logger.Warn("login", zap.Error(err))
-		}
-
-		if authInfo != nil {
+		_, err = client.Auth().Login(ctx, k8sAuth)
+		if err == nil {
 			break
 		}
 

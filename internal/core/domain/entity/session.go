@@ -33,3 +33,7 @@ func NewSession(userID string, refreshToken string) (Session, error) {
 		ExpiresAt:    now,
 	}, nil
 }
+
+func (s *Session) Expired() bool {
+	return time.Now().After(s.ExpiresAt)
+}

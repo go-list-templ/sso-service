@@ -33,3 +33,11 @@ func (s Session) Store(ctx context.Context, session entity.Session) error {
 
 	return err
 }
+
+func (s Session) Get(ctx context.Context, accessToken string) (entity.Session, error) {
+	return entity.Session{}, nil
+}
+
+func (s Session) Delete(ctx context.Context, session entity.Session) error {
+	return nil
+}

@@ -31,39 +31,7 @@ func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutpu
 		return dto.AuthOutput{}, err
 	}
 
-	refreshToken, err := a.token.CreateRefresh()
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	session, err := entity.NewSession(createOutput.UserId, refreshToken)
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	if err = a.repo.Store(ctx, session); err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	unsignedToken, err := a.token.Unsigned()
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	signature, err := a.vaultClient.SignJWT(ctx, unsignedToken)
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	accessToken, err := a.token.CreateAccess(unsignedToken, signature)
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	return dto.AuthOutput{
-		AccessToken:  accessToken,
-		RefreshToken: session.RefreshToken,
-	}, nil
+	return a.createSession(ctx, createOutput.UserId)
 }
 
 func (a *Auth) Login(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, error) {
@@ -77,39 +45,7 @@ func (a *Auth) Login(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, 
 		return dto.AuthOutput{}, err
 	}
 
-	refreshToken, err := a.token.CreateRefresh()
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	session, err := entity.NewSession(verifyCredOutput.UserId, refreshToken)
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	if err = a.repo.Store(ctx, session); err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	unsignedToken, err := a.token.Unsigned()
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	signature, err := a.vaultClient.SignJWT(ctx, unsignedToken)
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	accessToken, err := a.token.CreateAccess(unsignedToken, signature)
-	if err != nil {
-		return dto.AuthOutput{}, err
-	}
-
-	return dto.AuthOutput{
-		AccessToken:  accessToken,
-		RefreshToken: session.RefreshToken,
-	}, nil
+	return a.createSession(ctx, verifyCredOutput.UserId)
 }
 
 func (a *Auth) Refresh(ctx context.Context, input dto.RefreshInput) (dto.AuthOutput, error) {
@@ -118,12 +54,16 @@ func (a *Auth) Refresh(ctx context.Context, input dto.RefreshInput) (dto.AuthOut
 		return dto.AuthOutput{}, err
 	}
 
+	return a.createSession(ctx, currentSession.UserID.Value().String())
+}
+
+func (a *Auth) createSession(ctx context.Context, userId string) (dto.AuthOutput, error) {
 	refreshToken, err := a.token.CreateRefresh()
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}
 
-	session, err := entity.NewSession(currentSession.UserID.Value().String(), refreshToken)
+	session, err := entity.NewSession(userId, refreshToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

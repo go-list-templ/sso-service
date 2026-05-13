@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
+	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/internal/port"
 	"github.com/go-list-templ/sso-service/pkg/token"
@@ -52,6 +53,10 @@ func (a *Auth) Refresh(ctx context.Context, input dto.RefreshInput) (dto.AuthOut
 	currentSession, err := a.repo.FindAndDelete(ctx, input.RefreshToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
+	}
+
+	if currentSession.Expired() {
+		return dto.AuthOutput{}, entityerr.ErrSessionExpired
 	}
 
 	return a.createSession(ctx, currentSession.UserID.Value().String())

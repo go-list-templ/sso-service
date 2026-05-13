@@ -2,7 +2,7 @@ package dto
 
 type (
 	RefreshInput struct {
-		AccessToken string
+		RefreshToken string
 	}
 
 	AuthInput struct {

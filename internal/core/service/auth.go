@@ -49,7 +49,7 @@ func (a *Auth) Login(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, 
 }
 
 func (a *Auth) Refresh(ctx context.Context, input dto.RefreshInput) (dto.AuthOutput, error) {
-	currentSession, err := a.repo.FindAndDelete(ctx, input.AccessToken)
+	currentSession, err := a.repo.FindAndDelete(ctx, input.RefreshToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

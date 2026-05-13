@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"github.com/go-list-templ/sso-service/internal/core/domain/vo"
 	"time"
 
 	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
@@ -22,5 +23,13 @@ func FromEntity(session entity.Session) Session {
 		RefreshToken: session.RefreshToken,
 		ExpiresAt:    session.ExpiresAt,
 		CreatedAt:    session.CreatedAt,
+	}
+}
+
+// todo add logic with unsafe vo
+
+func (s *Session) ToEntity() entity.Session {
+	return entity.Session{
+		ID: vo.UnsafeID(),
 	}
 }

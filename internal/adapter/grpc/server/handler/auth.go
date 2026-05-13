@@ -62,3 +62,21 @@ func (a *Auth) Login(ctx context.Context, request *v1.LoginRequest) (*v1.LoginRe
 		RefreshToken: output.RefreshToken,
 	}, nil
 }
+
+func (a *Auth) Refresh(ctx context.Context, request *v1.RefreshRequest) (*v1.RefreshResponse, error) {
+	input := dto.RefreshInput{
+		AccessToken: request.GetRefreshToken(),
+	}
+
+	output, err := a.service.Refresh(ctx, input)
+	if err != nil {
+		a.logger.Warn("refresh", zap.Any("context", ctx), zap.Error(err))
+
+		return nil, err
+	}
+
+	return &v1.RefreshResponse{
+		AccessToken:  output.AccessToken,
+		RefreshToken: output.RefreshToken,
+	}, nil
+}

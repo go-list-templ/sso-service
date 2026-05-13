@@ -111,3 +111,51 @@ func (a *Auth) Login(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, 
 		RefreshToken: session.RefreshToken,
 	}, nil
 }
+
+func (a *Auth) Refresh(ctx context.Context, input dto.RefreshInput) (dto.AuthOutput, error) {
+	currentSession, err := a.repo.Get(ctx, input.AccessToken)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	err = a.repo.Delete(ctx, currentSession)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	refreshToken, err := a.token.CreateRefresh()
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	userId := currentSession.UserID.Value().String()
+
+	session, err := entity.NewSession(userId, refreshToken)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	if err = a.repo.Store(ctx, session); err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	unsignedToken, err := a.token.Unsigned()
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	signature, err := a.vaultClient.SignJWT(ctx, unsignedToken)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	accessToken, err := a.token.CreateAccess(unsignedToken, signature)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	return dto.AuthOutput{
+		AccessToken:  accessToken,
+		RefreshToken: session.RefreshToken,
+	}, nil
+}

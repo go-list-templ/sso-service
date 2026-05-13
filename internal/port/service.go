@@ -10,4 +10,5 @@ import (
 type AuthService interface {
 	Register(context.Context, dto.AuthInput) (dto.AuthOutput, error)
 	Login(context.Context, dto.AuthInput) (dto.AuthOutput, error)
+	Refresh(context.Context, dto.RefreshInput) (dto.AuthOutput, error)
 }

@@ -3,7 +3,7 @@ module github.com/go-list-templ/sso-service
 go 1.26
 
 require (
-	github.com/go-list-templ/proto v0.1.6
+	github.com/go-list-templ/proto v0.1.7
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/grafana/otel-profiling-go v0.5.1

@@ -9,16 +9,14 @@ import (
 )
 
 type Session struct {
-	ID           uuid.UUID `json:"id"`
-	UserID       uuid.UUID `json:"user_id"`
-	RefreshToken string    `json:"refresh_token"`
-	ExpiresAt    time.Time `json:"expires_at"`
-	CreatedAt    time.Time `json:"created_at"`
+	UserID       uuid.UUID `bson:"user_id"`
+	RefreshToken string    `bson:"refresh_token"`
+	ExpiresAt    time.Time `bson:"expires_at"`
+	CreatedAt    time.Time `bson:"created_at"`
 }
 
 func FromEntity(session entity.Session) Session {
 	return Session{
-		ID:           session.ID.Value(),
 		UserID:       session.UserID.Value(),
 		RefreshToken: session.RefreshToken,
 		ExpiresAt:    session.ExpiresAt,
@@ -28,7 +26,6 @@ func FromEntity(session entity.Session) Session {
 
 func (s *Session) ToEntity() entity.Session {
 	return entity.Session{
-		ID:           vo.UnsafeID(s.ID),
 		UserID:       vo.UnsafeID(s.UserID),
 		RefreshToken: s.RefreshToken,
 		ExpiresAt:    s.ExpiresAt,

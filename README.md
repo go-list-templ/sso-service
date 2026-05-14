@@ -75,6 +75,7 @@ Forward port on localhost from app
 ```bash
 werf kubectl port-forward svc/sso-service 8080:8080 -n sso-service
 werf kubectl port-forward svc/sso-service 8081:8081 -n sso-service
+werf kubectl port-forward svc/sso-service-mongodb 27017:27017 -n sso-service
 ```
 
 Get events in kuber

@@ -94,6 +94,6 @@ func (a *Auth) createSession(ctx context.Context, userId string) (dto.AuthOutput
 
 	return dto.AuthOutput{
 		AccessToken:  accessToken,
-		RefreshToken: session.RefreshToken,
+		RefreshToken: session.RefreshToken.Value(),
 	}, nil
 }

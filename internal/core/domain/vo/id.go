@@ -12,13 +12,7 @@ type ID struct {
 	value uuid.UUID
 }
 
-func NewID() ID {
-	return ID{
-		value: uuid.New(),
-	}
-}
-
-func FromStr(id string) (ID, error) {
+func NewID(id string) (ID, error) {
 	parse, err := uuid.Parse(id)
 	if err != nil {
 		return ID{}, ErrInvalidID

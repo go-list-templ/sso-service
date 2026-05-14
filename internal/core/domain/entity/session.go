@@ -8,7 +8,6 @@ import (
 )
 
 type Session struct {
-	ID           vo.ID
 	UserID       vo.ID
 	RefreshToken string
 	ExpiresAt    time.Time
@@ -16,8 +15,6 @@ type Session struct {
 }
 
 func NewSession(userID string, refreshToken string) (Session, error) {
-	id := vo.NewID()
-
 	validUserId, err := vo.FromStr(userID)
 	if err != nil {
 		return Session{}, entityerr.NewSessionError("userId", err)
@@ -26,7 +23,6 @@ func NewSession(userID string, refreshToken string) (Session, error) {
 	now := time.Now()
 
 	return Session{
-		ID:           id,
 		UserID:       validUserId,
 		RefreshToken: refreshToken,
 		CreatedAt:    now,

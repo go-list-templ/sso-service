@@ -1,10 +1,10 @@
 package dao
 
 import (
-	"github.com/go-list-templ/sso-service/internal/core/domain/vo"
 	"time"
 
 	"github.com/go-list-templ/sso-service/internal/core/domain/entity"
+	"github.com/go-list-templ/sso-service/internal/core/domain/vo"
 	"github.com/google/uuid"
 )
 
@@ -26,10 +26,12 @@ func FromEntity(session entity.Session) Session {
 	}
 }
 
-// todo add logic with unsafe vo
-
 func (s *Session) ToEntity() entity.Session {
 	return entity.Session{
-		ID: vo.UnsafeID(),
+		ID:           vo.UnsafeID(s.ID),
+		UserID:       vo.UnsafeID(s.UserID),
+		RefreshToken: s.RefreshToken,
+		ExpiresAt:    s.ExpiresAt,
+		CreatedAt:    s.CreatedAt,
 	}
 }

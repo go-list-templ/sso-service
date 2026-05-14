@@ -45,6 +45,7 @@ func (s Session) FindAndDelete(ctx context.Context, refreshToken string) (entity
 
 	err := collection.FindOneAndDelete(ctx, filter).Decode(&sessionDAO)
 	if err != nil {
+		//todo add error handling on not found
 		s.logger.Error("delete session", zap.Any("ctx", ctx), zap.Error(err))
 
 		return entity.Session{}, err

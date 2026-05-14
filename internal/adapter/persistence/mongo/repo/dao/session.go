@@ -18,8 +18,8 @@ type Session struct {
 func FromEntity(session entity.Session) Session {
 	return Session{
 		UserID:       session.UserID.Value(),
-		RefreshToken: session.RefreshToken,
-		ExpiresAt:    session.ExpiresAt,
+		RefreshToken: session.RefreshToken.Value(),
+		ExpiresAt:    session.ExpiresAt.Value(),
 		CreatedAt:    session.CreatedAt,
 	}
 }
@@ -27,8 +27,8 @@ func FromEntity(session entity.Session) Session {
 func (s *Session) ToEntity() entity.Session {
 	return entity.Session{
 		UserID:       vo.UnsafeID(s.UserID),
-		RefreshToken: s.RefreshToken,
-		ExpiresAt:    s.ExpiresAt,
+		RefreshToken: vo.UnsafeRefreshToken(s.RefreshToken),
+		ExpiresAt:    vo.UnsafeExpiresAt(s.ExpiresAt),
 		CreatedAt:    s.CreatedAt,
 	}
 }

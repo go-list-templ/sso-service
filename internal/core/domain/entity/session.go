@@ -3,33 +3,37 @@ package entity
 import (
 	"time"
 
-	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 	"github.com/go-list-templ/sso-service/internal/core/domain/vo"
 )
 
 type Session struct {
 	UserID       vo.ID
-	RefreshToken string
-	ExpiresAt    time.Time
+	RefreshToken vo.RefreshToken
+	ExpiresAt    vo.ExpiresAt
 	CreatedAt    time.Time
 }
 
 func NewSession(userID string, refreshToken string) (Session, error) {
-	validUserId, err := vo.FromStr(userID)
+	validRefreshToken, err := vo.NewRefreshToken(refreshToken)
 	if err != nil {
-		return Session{}, entityerr.NewSessionError("userId", err)
+		return Session{}, err
+	}
+
+	validUserId, err := vo.NewID(userID)
+	if err != nil {
+		return Session{}, err
 	}
 
 	now := time.Now()
 
 	return Session{
 		UserID:       validUserId,
-		RefreshToken: refreshToken,
+		RefreshToken: validRefreshToken,
+		ExpiresAt:    vo.NewExpiresAt(now),
 		CreatedAt:    now,
-		ExpiresAt:    now,
 	}, nil
 }
 
 func (s *Session) Expired() bool {
-	return time.Now().After(s.ExpiresAt)
+	return s.ExpiresAt.Expired()
 }

@@ -3,9 +3,9 @@ package interceptor
 import (
 	"context"
 	"errors"
-	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 
 	"github.com/go-list-templ/sso-service/internal/adapter/grpc/client"
+	"github.com/go-list-templ/sso-service/internal/core/domain/entityerr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -16,10 +16,7 @@ const (
 	DurationAccessToken = 15 * time.Minute
 )
 
-var (
-	ErrInvalidToken  = errors.New("invalid token")
-	ErrGenerateToken = errors.New("generate token")
-)
+var ErrGenerateToken = errors.New("generate token")
 
 type Token struct {
 	cfg    *config.Config

@@ -34,8 +34,11 @@ func (s *Session) Store(ctx context.Context, session entity.Session) error {
 	sessionDAO := dao.FromEntity(session)
 
 	_, err := collection.InsertOne(ctx, sessionDAO)
+	if err != nil {
+		s.logger.Error("store", zap.Any("context", ctx), zap.Error(err))
+	}
 
-	return s.toMongoError(ctx, err)
+	return s.toMongoError(err)
 }
 
 func (s *Session) FindAndDelete(ctx context.Context, refreshToken string) (entity.Session, error) {
@@ -47,13 +50,15 @@ func (s *Session) FindAndDelete(ctx context.Context, refreshToken string) (entit
 
 	err := collection.FindOneAndDelete(ctx, filter).Decode(&sessionDAO)
 	if err != nil {
-		return entity.Session{}, s.toMongoError(ctx, err)
+		s.logger.Error("find and delete", zap.Any("context", ctx), zap.Error(err))
+
+		return entity.Session{}, s.toMongoError(err)
 	}
 
 	return sessionDAO.ToEntity(), nil
 }
 
-func (s *Session) toMongoError(ctx context.Context, err error) error {
+func (s *Session) toMongoError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -61,8 +66,6 @@ func (s *Session) toMongoError(ctx context.Context, err error) error {
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return entityerr.ErrSessionNotFound
 	}
-
-	s.logger.Error("mongo", zap.Any("context", ctx), zap.Error(err))
 
 	return err
 }

@@ -77,7 +77,7 @@ func (a *Auth) createSession(ctx context.Context, userId string) (dto.AuthOutput
 		return dto.AuthOutput{}, err
 	}
 
-	unsignedToken, err := a.token.Unsigned()
+	unsignedToken, err := a.token.Unsigned(userId, session.CreatedAt)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

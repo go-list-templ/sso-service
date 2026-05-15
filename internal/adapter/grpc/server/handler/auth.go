@@ -33,7 +33,7 @@ func (a *Auth) Register(ctx context.Context, request *v1.RegisterRequest) (*v1.R
 
 	output, err := a.service.Register(ctx, input)
 	if err != nil {
-		a.logger.Warn("register", zap.Any("context", ctx), zap.Error(err))
+		a.logger.Error("register", zap.Any("context", ctx), zap.Error(err))
 
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (a *Auth) Login(ctx context.Context, request *v1.LoginRequest) (*v1.LoginRe
 
 	output, err := a.service.Login(ctx, input)
 	if err != nil {
-		a.logger.Warn("login", zap.Any("context", ctx), zap.Error(err))
+		a.logger.Error("login", zap.Any("context", ctx), zap.Error(err))
 
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (a *Auth) Refresh(ctx context.Context, request *v1.RefreshRequest) (*v1.Ref
 
 	output, err := a.service.Refresh(ctx, input)
 	if err != nil {
-		a.logger.Warn("refresh", zap.Any("context", ctx), zap.Error(err))
+		a.logger.Error("refresh", zap.Any("context", ctx), zap.Error(err))
 
 		return nil, err
 	}

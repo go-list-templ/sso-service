@@ -64,7 +64,7 @@ func New(cfg *config.Vault, logger *zap.Logger) (*Vault, error) {
 			break
 		}
 
-		logger.Warn("trying to connect", zap.Int("attempts", connAttempts), zap.Error(err))
+		logger.Error("trying to connect", zap.Int("attempts", connAttempts), zap.Error(err))
 
 		time.Sleep(connTimeout)
 

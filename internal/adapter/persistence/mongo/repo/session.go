@@ -26,8 +26,6 @@ func NewSession(m *mongoClient.Mongo, l *zap.Logger) *Session {
 	return &Session{m, l}
 }
 
-//TODO auto delete in mongo after refresh token expired
-
 func (s *Session) Store(ctx context.Context, session entity.Session) error {
 	collection := s.Database.Collection(Collection)
 

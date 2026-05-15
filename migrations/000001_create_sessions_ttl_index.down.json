@@ -1,4 +1,6 @@
-{
-  "dropIndexes": "sessions",
-  "index": "ttl_expires_at_index"
-}
+[
+  {
+    "dropIndexes": "sessions",
+    "index": "ttl_expires_at_index"
+  }
+]

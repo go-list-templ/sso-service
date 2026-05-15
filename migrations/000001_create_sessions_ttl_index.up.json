@@ -1,12 +1,14 @@
-{
-  "createIndexes": "sessions",
-  "indexes": [
-    {
-      "key": {
-        "expires_at": 1
-      },
-      "name": "ttl_expires_at_index",
-      "expireAfterSeconds": 0
-    }
-  ]
-}
+[
+  {
+    "createIndexes": "sessions",
+    "indexes": [
+      {
+        "key": {
+          "expires_at": 1
+        },
+        "name": "ttl_expires_at_index",
+        "expireAfterSeconds": 0
+      }
+    ]
+  }
+]

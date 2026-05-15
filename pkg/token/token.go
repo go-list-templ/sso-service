@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/go-list-templ/sso-service/pkg/config"
@@ -66,37 +65,4 @@ func (t *Token) CreateRefresh() (string, error) {
 	}
 
 	return base64.RawURLEncoding.EncodeToString(b), nil
-}
-
-func (t *Token) keyFunc() jwt.Keyfunc {
-	return func(_ *jwt.Token) (interface{}, error) { return "", nil }
-}
-
-func (t *Token) verifyAccess(accessToken string) error {
-	token, err := jwt.Parse(accessToken,
-		t.keyFunc(),
-		jwt.WithValidMethods([]string{jwt.SigningMethodRS256.Name}),
-		jwt.WithIssuer(t.cfg.App.Name),
-		jwt.WithExpirationRequired(),
-	)
-
-	if err != nil {
-		return fmt.Errorf("parse token failed: %w", err)
-	}
-
-	if !token.Valid {
-		return ErrInvalidToken
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return ErrInvalidToken
-	}
-
-	userEmail, _ := claims["user_email"].(string)
-	userName, _ := claims["user_name"].(string)
-
-	fmt.Println(userEmail, userName)
-
-	return nil
 }

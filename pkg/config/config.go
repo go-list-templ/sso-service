@@ -9,8 +9,9 @@ import (
 
 type (
 	App struct {
-		Name    string `envconfig:"APP_NAME"`
-		Version string `envconfig:"APP_VERSION"`
+		Name        string `envconfig:"APP_NAME"`
+		ServiceName string `envconfig:"APP_SERVICE_NAME"`
+		Version     string `envconfig:"APP_VERSION"`
 	}
 
 	Server struct {

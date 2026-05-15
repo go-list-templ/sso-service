@@ -29,7 +29,7 @@ func NewToken(cfg *config.Config, l *zap.Logger) *Token {
 
 func (t *Token) Unsigned(userId string, sessionCreatedAt time.Time) (string, error) {
 	claims := jwt.MapClaims{
-		"iss": "sso-service",
+		"iss": t.cfg.App.ServiceName,
 		"sub": userId,
 		"iat": sessionCreatedAt.Unix(),
 		"nbf": sessionCreatedAt.Unix(),

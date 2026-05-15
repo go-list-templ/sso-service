@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: "{{ .Chart.Name }}-wait-depends-rev{{ .Release.Revision }}"
   annotations:
-    werf.io/weight: "10"
+    werf.io/weight: "20"
 spec:
   backoffLimit: 0
   template:

@@ -4,4 +4,4 @@ metadata:
   name: {{ .Chart.Name }}-sa
   namespace: {{ .Release.Namespace }}
   annotations:
-    werf.io/weight: "20"
+    werf.io/weight: "10"

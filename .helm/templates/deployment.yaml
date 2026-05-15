@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   annotations:
-    werf.io/weight: "30"
+    werf.io/weight: "40"
 spec:
   replicas: {{ .Values.app.replicas }}
   selector:

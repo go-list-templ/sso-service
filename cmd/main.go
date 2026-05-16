@@ -91,6 +91,7 @@ func run() error {
 	logger.Info("initializing services")
 
 	authService := service.NewAuth(userClt, vaultClt, authMongoRepo, tk)
+	JWKSService := service.NewJWKS(vaultClt)
 
 	logger.Info("initializing servers")
 
@@ -107,6 +108,7 @@ func run() error {
 	logger.Info("registering http handlers")
 
 	httphandler.RegisterDiagnostic()
+	httphandler.RegisterJWKS(JWKSService, logger.With(zap.String("module", "jwks handler")))
 
 	logger.Info("server started successfully")
 

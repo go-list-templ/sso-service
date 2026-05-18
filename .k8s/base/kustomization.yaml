@@ -4,8 +4,6 @@ kind: Kustomization
 namespace: sso-service
 
 resources:
-  - job/wait-depends.yaml
-  - job/migrate.yaml
   - configmap.yaml
   - deployment.yaml
   - sa.yaml

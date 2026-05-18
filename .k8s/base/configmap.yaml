@@ -20,7 +20,7 @@ data:
 
   DB_USERNAME: "root"
   DB_PASSWORD: "password"
-  DB_HOST: "sso-mongodb"
+  DB_HOST: "sso-service-mongodb"
   DB_PORT: "27017"
   DB_NAME: "sso"
 

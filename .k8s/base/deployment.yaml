@@ -15,6 +15,75 @@ spec:
         app: sso-service
     spec:
       serviceAccountName: sso-service-sa
+      initContainers:
+        - name: wait-mongodb
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -w 2 $(DB_HOST) $(DB_PORT); do
+                echo "Waiting for mongodb...";
+                sleep 2;
+              done;
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: sso-service-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: sso-service-config
+                  key: DB_PORT
+          resources:
+            requests:
+              cpu: 50m
+              memory: 50Mi
+            limits:
+              cpu: 50m
+              memory: 50Mi
+        - name: run-migrations
+          image: sso-service-image
+          command:
+            - /migrations/migrate
+            - -path=/migrations/schemes
+            - -database=mongodb://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
+            - up
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: sso-service-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: sso-service-config
+                  key: DB_PORT
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: sso-service-config
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: sso-service-config
+                  key: DB_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: sso-service-config
+                  key: DB_NAME
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
       containers:
         - name: sso-service
           image: sso-service-image

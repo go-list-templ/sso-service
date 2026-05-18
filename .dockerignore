@@ -4,6 +4,7 @@
 .idea
 .vscode
 
+Tiltfile
 coverage.yml
 LICENSE
 lint.yml

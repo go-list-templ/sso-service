@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ .Chart.Name }}-migrate-rev{{ .Release.Revision }}"
+  name: sso-service-migrate
   annotations:
     werf.io/weight: "30"
 spec:
@@ -13,7 +13,7 @@ spec:
         - name: registrysecret
       containers:
         - name: migrate
-          image: {{ .Values.werf.image.app }}
+          image: sso-service-image
           command:
             - /migrations/migrate
             - -path=/migrations/schemes
@@ -21,12 +21,12 @@ spec:
             - up
           env:
             - name: DB_HOST
-              value: "{{ .Release.Name }}-{{ .Values.mongodb.host }}"
+              value: "sso-mongodb"
             - name: DB_USER
-              value: {{ .Values.mongodb.auth.username | quote }}
+              value: "root"
             - name: DB_PASSWORD
-              value: {{ .Values.mongodb.auth.password | quote }}
+              value: "password"
             - name: DB_NAME
-              value: {{ .Values.mongodb.auth.database | quote }}
+              value: "sso"
             - name: DB_PORT
-              value: {{ .Values.mongodb.port | quote }}
+              value: "27017"

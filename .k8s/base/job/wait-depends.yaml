@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ .Chart.Name }}-wait-depends-rev{{ .Release.Revision }}"
+  name: sso-service-wait-mongodb
   annotations:
     werf.io/weight: "20"
 spec:
@@ -11,7 +11,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: waiting-mongodb
-          image: busybox
+          image: busybox:1.37
           command:
             - sh
             - -c
@@ -22,9 +22,9 @@ spec:
               done;
           env:
             - name: DB_HOST
-              value: "{{ .Release.Name }}-{{ .Values.mongodb.host }}"
+              value: "sso-mongodb"
             - name: DB_PORT
-              value: {{ .Values.mongodb.port | quote }}
+              value: "27017"
           resources:
             requests:
               cpu: 50m

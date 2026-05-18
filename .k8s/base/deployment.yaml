@@ -1,36 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: sso-service
   annotations:
     werf.io/weight: "40"
 spec:
-  replicas: {{ .Values.app.replicas }}
+  replicas: 3
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      app: sso-service
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        app: sso-service
     spec:
-      serviceAccountName: {{ .Chart.Name }}-sa
-      imagePullSecrets:
-        - name: registrysecret
+      serviceAccountName: sso-service-sa
       containers:
-        - name: {{ .Chart.Name }}
-          image: {{ .Values.werf.image.app }}
+        - name: sso-service
+          image: sso-service-image
           ports:
-            - name: {{ .Values.app.grpc.name }}
-              containerPort: {{ .Values.app.grpc.port }}
-              protocol: {{ .Values.app.grpc.protocol }}
-            - name: {{ .Values.app.http.name }}
-              containerPort: {{ .Values.app.http.port }}
-              protocol: {{ .Values.app.http.protocol }}
+            - name: grpc
+              containerPort: 8080
+              protocol: TCP
+            - name: http
+              containerPort: 8081
+              protocol: TCP
           startupProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.app.http.port }}
+              port: 8081
             periodSeconds: 3
             failureThreshold: 20
           env:
@@ -40,11 +38,11 @@ spec:
                   fieldPath: metadata.name
           envFrom:
             - configMapRef:
-                name: {{ .Chart.Name }}-config
+                name: sso-service-config
           resources:
             requests:
-              cpu: {{ $.Values.app.requests.cpu }}
-              memory: {{ $.Values.app.requests.memory}}
+              cpu: "100m"
+              memory: "128Mi"
             limits:
-              cpu: {{ $.Values.app.limits.cpu }}
-              memory: {{ $.Values.app.limits.memory }}
+              cpu: "1"
+              memory: "512Mi"

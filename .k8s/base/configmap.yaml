@@ -1,40 +1,40 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Chart.Name }}-config
+  name: sso-service-config
 data:
-  APP_NAME: {{ .Chart.Name | quote }}
-  APP_SERVICE_NAME: {{ .Chart.Name | quote }}
-  APP_VERSION: {{ .Values.werf.image.app | quote}}
+  APP_NAME: "sso-service"
+  APP_SERVICE_NAME: "sso-service"
+  APP_VERSION: "latest"
 
-  GRPC_PORT: {{ .Values.app.grpc.port | quote }}
-  GRPC_TIME: {{ .Values.app.grpc.time | quote }}
-  GRPC_TIMEOUT: {{ .Values.app.grpc.timeout | quote }}
-  GRPC_MAX_CONN_IDLE: {{ .Values.app.grpc.maxIdle | quote }}
-  GRPC_MAX_CONN_AGE: {{ .Values.app.grpc.maxAge | quote }}
+  GRPC_PORT: "8080"
+  GRPC_TIME: "30s"
+  GRPC_TIMEOUT: "5s"
+  GRPC_MAX_CONN_IDLE: "15m"
+  GRPC_MAX_CONN_AGE: "30m"
 
-  HTTP_PORT: {{ .Values.app.http.port | quote }}
-  HTTP_TIMEOUT: {{ .Values.app.http.httpTimeout | quote }}
-  IDLE_TIMEOUT: {{ .Values.app.http.idleTimeout | quote }}
-  SHUTDOWN_TIMEOUT: {{ .Values.app.shutdownTimeout | quote }}
+  HTTP_PORT: "8081"
+  HTTP_TIMEOUT: "5s"
+  IDLE_TIMEOUT: "30s"
+  SHUTDOWN_TIMEOUT: "30s"
 
-  DB_USERNAME: {{ .Values.mongodb.auth.username | quote }}
-  DB_PASSWORD: {{ .Values.mongodb.auth.password | quote }}
-  DB_HOST: "{{ .Release.Name }}-{{ .Values.mongodb.host }}"
-  DB_PORT: {{ .Values.mongodb.port | quote }}
-  DB_NAME: {{ .Values.mongodb.auth.database | quote }}
+  DB_USERNAME: "root"
+  DB_PASSWORD: "password"
+  DB_HOST: "sso-mongodb"
+  DB_PORT: "27017"
+  DB_NAME: "sso"
 
-  USER_CLIENT_HOST: {{ .Values.app.clients.users.host | quote }}
-  USER_CLIENT_PORT: {{ .Values.app.clients.users.port | quote }}
+  USER_CLIENT_HOST: "users-service.users-service.svc.cluster.local"
+  USER_CLIENT_PORT: "8080"
 
-  OTEL_IS_TLS: {{ .Values.telemetry.collector.isTls | quote }}
-  OTEL_ENDPOINT: {{ .Values.telemetry.collector.url | quote}}
-  OTEL_PYROSCOPE_ENDPOINT: {{ .Values.telemetry.pyroscope.url | quote}}
-  OTEL_TIMEOUT: {{ .Values.telemetry.collector.timeout | quote }}
+  OTEL_IS_TLS: "false"
+  OTEL_ENDPOINT: "alloy.monitoring.svc.cluster.local:4317"
+  OTEL_PYROSCOPE_ENDPOINT: "http://alloy.monitoring.svc.cluster.local:4040"
+  OTEL_TIMEOUT: "15s"
 
-  PRIVATE_KEY_FILE: {{ .Values.privateKey.file | quote }}
+  PRIVATE_KEY_FILE: "/vault/secrets/jwt-keys.json"
 
-  VAULT_URL: {{ .Values.vault.url | quote }}
-  VAULT_ROLE: {{ .Values.vault.role | quote }}
-  VAULT_TRANSIT_NAME: {{ .Values.vault.transitName | quote }}
-  VAULT_SA_TOKEN_PATH: {{ .Values.vault.saTokenPath | quote}}
+  VAULT_URL: "http://vault.secrets.svc.cluster.local:8200"
+  VAULT_ROLE: "sso-service-role"
+  VAULT_TRANSIT_NAME: "sso-service-keys"
+  VAULT_SA_TOKEN_PATH: "/var/run/secrets/kubernetes.io/serviceaccount/token"

@@ -1,31 +1,3 @@
-app:
-  replicas: 3
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 1
-    memory: 512Mi
-  clients:
-    users:
-      host: "users-service.users-service.svc.cluster.local"
-      port: 8080
-  grpc:
-    name: grpc
-    port: 8080
-    protocol: TCP
-    time: "30s"
-    timeout: "5s"
-    maxIdle: "15m"
-    maxAge: "30m"
-  http:
-    name: http
-    port: 8081
-    protocol: TCP
-    httpTimeout: "5s"
-    idleTimeout: "30s"
-  shutdownTimeout: "30s"
-
 mongodb:
   host: mongodb
   port: 27017
@@ -45,21 +17,4 @@ mongodb:
     limits:
       cpu: 1
       memory: 512Mi
-
-telemetry:
-  collector:
-    url: "alloy.monitoring.svc.cluster.local:4317"
-    timeout: "15s"
-    isTls: false
-  pyroscope:
-    url: "http://alloy.monitoring.svc.cluster.local:4040"
-
-vault:
-  role: "sso-service-role"
-  url: "http://vault.secrets.svc.cluster.local:8200"
-  transitName: "sso-service-keys"
-  saTokenPath: "/var/run/secrets/kubernetes.io/serviceaccount/token"
-
-privateKey:
-  file: "/vault/secrets/jwt-keys.json"
 

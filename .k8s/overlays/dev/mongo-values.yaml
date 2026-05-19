@@ -1,0 +1,18 @@
+auth:
+  enabled: true
+  rootPassword: root
+  username: root
+  password: password
+  database: sso
+
+persistence:
+  enabled: true
+  size: 3Gi
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1
+    memory: 512Mi

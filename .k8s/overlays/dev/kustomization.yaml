@@ -11,5 +11,5 @@ helmCharts:
     releaseName: mongodb
     namespace: sso-service
     repo: https://charts.bitnami.com/bitnami
-    version: 18.6.26
+    version: 19.0.0
     valuesFile: mongo-values.yaml

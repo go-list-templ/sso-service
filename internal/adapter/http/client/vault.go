@@ -33,7 +33,7 @@ func RegisterVault(c *config.Vault, v *vault.Vault, l *zap.Logger) *Vault {
 	}
 }
 
-func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (string, error) {
+func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (dto.SignJWT, error) {
 	path := filepath.Join(SignPath, v.cfg.TransitName)
 
 	data := map[string]any{
@@ -45,17 +45,19 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (string, erro
 	if err != nil {
 		v.logger.Error("sign token", zap.Any("context", ctx), zap.Error(err))
 
-		return "", err
+		return dto.SignJWT{}, err
 	}
 
-	v.logger.Info("data from vault", zap.Any("context", ctx), zap.Any("data", secret))
-
+	keyVersion := secret.Data["key_version"].(string)
 	rawSignature := secret.Data["signature"].(string)
 
 	parts := strings.Split(rawSignature, ":")
 	signature := parts[len(parts)-1]
 
-	return signature, nil
+	return dto.SignJWT{
+		Version:   keyVersion,
+		Signature: signature,
+	}, nil
 }
 
 func (v *Vault) GetPublicKeys(ctx context.Context) ([]dto.VaultPublicKey, error) {

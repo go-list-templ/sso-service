@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
@@ -41,12 +42,12 @@ func (t *Token) Unsigned(userId string, sessionCreatedAt time.Time) (string, err
 	return token.SigningString()
 }
 
-func (t *Token) CreateAccess(unsignedToken, signature string) (string, error) {
-	if unsignedToken == "" || signature == "" {
+func (t *Token) CreateAccess(unsignedToken string, signJWT dto.SignJWT) (string, error) {
+	if unsignedToken == "" || signJWT.Signature == "" {
 		return "", errors.New("invalid token components")
 	}
 
-	return unsignedToken + "." + signature, nil
+	return unsignedToken + "." + signJWT.Signature, nil
 }
 
 func (t *Token) CreateRefresh() (string, error) {

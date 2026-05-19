@@ -82,12 +82,12 @@ func (a *Auth) createSession(ctx context.Context, userId string) (dto.AuthOutput
 		return dto.AuthOutput{}, err
 	}
 
-	signature, err := a.vaultClient.SignJWT(ctx, unsignedToken)
+	signJWT, err := a.vaultClient.SignJWT(ctx, unsignedToken)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}
 
-	accessToken, err := a.token.CreateAccess(unsignedToken, signature)
+	accessToken, err := a.token.CreateAccess(unsignedToken, signJWT)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

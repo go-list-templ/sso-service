@@ -32,9 +32,8 @@ data:
   OTEL_PYROSCOPE_ENDPOINT: "http://alloy.monitoring.svc.cluster.local:4040"
   OTEL_TIMEOUT: "15s"
 
-  PRIVATE_KEY_FILE: "/vault/secrets/jwt-keys.json"
-
   VAULT_URL: "http://vault.secrets.svc.cluster.local:8200"
   VAULT_ROLE: "sso-service-role"
   VAULT_TRANSIT_NAME: "sso-service-keys"
   VAULT_SA_TOKEN_PATH: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  VAULT_TRANSIT_VERSION_PATH: "/vault/secrets/key-version.txt"

@@ -3,7 +3,9 @@ package token
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/go-list-templ/sso-service/internal/core/dto"
@@ -47,7 +49,33 @@ func (t *Token) CreateAccess(unsignedToken string, signJWT dto.SignJWT) (string,
 		return "", errors.New("invalid token components")
 	}
 
-	return unsignedToken + "." + signJWT.Signature, nil
+	parts := strings.Split(unsignedToken, ".")
+	if len(parts) != 2 {
+		return "", errors.New("invalid unsigned token format")
+	}
+
+	base64Header, payload := parts[0], parts[1]
+
+	headerBytes, err := base64.RawURLEncoding.DecodeString(base64Header)
+	if err != nil {
+		return "", err
+	}
+
+	var header map[string]any
+	if err = json.Unmarshal(headerBytes, &header); err != nil {
+		return "", err
+	}
+
+	header["kid"] = signJWT.Version
+
+	newHeaderBytes, err := json.Marshal(header)
+	if err != nil {
+		return "", err
+	}
+
+	accessToken := base64.RawURLEncoding.EncodeToString(newHeaderBytes) + "." + payload + "." + signJWT.Signature
+
+	return accessToken, nil
 }
 
 func (t *Token) CreateRefresh() (string, error) {

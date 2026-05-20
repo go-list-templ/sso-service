@@ -15,6 +15,6 @@ func NewJWKS(v port.VaultClient) *JWKS {
 	return &JWKS{v}
 }
 
-func (a *JWKS) Get(ctx context.Context) ([]dto.VaultPublicKey, error) {
+func (a *JWKS) Get(ctx context.Context) (dto.PublicKeys, error) {
 	return a.vaultClient.GetPublicKeys(ctx)
 }

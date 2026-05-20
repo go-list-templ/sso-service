@@ -16,6 +16,6 @@ type (
 
 	VaultClient interface {
 		SignJWT(context.Context, string) (dto.SignJWT, error)
-		GetPublicKeys(context.Context) ([]dto.VaultPublicKey, error)
+		GetPublicKeys(context.Context) (dto.PublicKeys, error)
 	}
 )

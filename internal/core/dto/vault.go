@@ -1,6 +1,10 @@
 package dto
 
-type VaultPublicKey struct {
+type PublicKeys struct {
+	Keys []PublicKey
+}
+
+type PublicKey struct {
 	Version string
 	Key     string
 }

@@ -61,33 +61,35 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (dto.SignJWT,
 	}, nil
 }
 
-func (v *Vault) GetPublicKeys(ctx context.Context) ([]dto.VaultPublicKey, error) {
+func (v *Vault) GetPublicKeys(ctx context.Context) (dto.PublicKeys, error) {
 	path := filepath.Join(KeysPath, v.cfg.TransitName)
 
 	secret, err := v.vault.Logical().ReadWithContext(ctx, path)
 	if err != nil {
 		v.logger.Error("failed to read transit key from vault", zap.Error(err))
-		return nil, err
+		return dto.PublicKeys{}, err
 	}
 
 	if secret == nil || secret.Data == nil {
 		v.logger.Warn("transit key data is empty")
-		return nil, nil
+		return dto.PublicKeys{}, nil
 	}
 
 	rawKeys, exists := secret.Data["keys"]
 	if !exists {
 		v.logger.Warn("no keys found in vault response")
-		return nil, nil
+		return dto.PublicKeys{}, nil
 	}
 
 	keysMap, ok := rawKeys.(map[string]any)
 	if !ok {
 		v.logger.Error("failed to cast keys to map[string]any")
-		return nil, err
+		return dto.PublicKeys{}, err
 	}
 
-	publicKeys := make([]dto.VaultPublicKey, 0)
+	publicKeys := dto.PublicKeys{
+		Keys: make([]dto.PublicKey, 0),
+	}
 
 	for version, keyData := range keysMap {
 		details, ok := keyData.(map[string]any)
@@ -100,10 +102,12 @@ func (v *Vault) GetPublicKeys(ctx context.Context) ([]dto.VaultPublicKey, error)
 			continue
 		}
 
-		publicKeys = append(publicKeys, dto.VaultPublicKey{
+		publicKey := dto.PublicKey{
 			Version: version,
 			Key:     pubKeyRaw.(string),
-		})
+		}
+
+		publicKeys.Keys = append(publicKeys.Keys, publicKey)
 	}
 
 	return publicKeys, nil

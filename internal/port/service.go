@@ -16,6 +16,6 @@ type (
 	}
 
 	JWKSService interface {
-		Get(context.Context) ([]dto.VaultPublicKey, error)
+		Get(context.Context) (dto.PublicKeys, error)
 	}
 )

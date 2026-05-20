@@ -49,10 +49,11 @@ type (
 	}
 
 	Vault struct {
-		TransitName string `envconfig:"VAULT_TRANSIT_NAME"`
-		URL         string `envconfig:"VAULT_URL"`
-		Role        string `envconfig:"VAULT_ROLE"`
-		SATokenPath string `envconfig:"VAULT_SA_TOKEN_PATH"`
+		TransitName        string `envconfig:"VAULT_TRANSIT_NAME"`
+		URL                string `envconfig:"VAULT_URL"`
+		Role               string `envconfig:"VAULT_ROLE"`
+		SATokenPath        string `envconfig:"VAULT_SA_TOKEN_PATH"`
+		TransitVersionPath string `envconfig:"VAULT_TRANSIT_VERSION_PATH"`
 	}
 
 	Config struct {

@@ -15,8 +15,6 @@ import (
 )
 
 const (
-	Algorithm = "jws"
-
 	SignPath = "transit/sign"
 	KeysPath = "transit/keys"
 )
@@ -43,9 +41,8 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken, version string) (str
 	path := filepath.Join(SignPath, v.cfg.TransitName)
 
 	data := map[string]any{
-		"input":                base64.StdEncoding.EncodeToString([]byte(unsignedToken)),
-		"key_version":          version,
-		"marshaling_algorithm": Algorithm,
+		"input":       base64.StdEncoding.EncodeToString([]byte(unsignedToken)),
+		"key_version": version,
 	}
 
 	secret, err := v.vault.Logical().WriteWithContext(ctx, path, data)
@@ -67,8 +64,15 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken, version string) (str
 	v.logger.Info("sign token", zap.Any("context", ctx), zap.String("version", version))
 
 	signature := parts[len(parts)-1]
+	decodedSig, err := base64.StdEncoding.DecodeString(signature)
+	if err != nil {
+		v.logger.Error("decode signature", zap.Any("context", ctx), zap.Error(err))
+		return "", err
+	}
 
-	return strings.TrimSpace(signature), nil
+	jwtSafeSignature := base64.RawURLEncoding.EncodeToString(decodedSig)
+
+	return strings.TrimSpace(jwtSafeSignature), nil
 }
 
 func (v *Vault) GetPublicKeys(ctx context.Context) (dto.PublicKeys, error) {

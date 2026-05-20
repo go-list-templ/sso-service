@@ -34,11 +34,12 @@ func RegisterVault(c *config.Vault, v *vault.Vault, l *zap.Logger) *Vault {
 	}
 }
 
-func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (dto.SignJWT, error) {
+func (v *Vault) SignJWT(ctx context.Context, unsignedToken, version string) (string, error) {
 	path := filepath.Join(SignPath, v.cfg.TransitName)
 
 	data := map[string]any{
 		"input":                base64.StdEncoding.EncodeToString([]byte(unsignedToken)),
+		"key_version":          version,
 		"marshaling_algorithm": Algorithm,
 	}
 
@@ -46,19 +47,15 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (dto.SignJWT,
 	if err != nil {
 		v.logger.Error("sign token", zap.Any("context", ctx), zap.Error(err))
 
-		return dto.SignJWT{}, err
+		return "", err
 	}
 
-	keyVersion := fmt.Sprintf("%v", secret.Data["key_version"])
 	rawSignature := fmt.Sprintf("%v", secret.Data["signature"])
 
 	parts := strings.Split(rawSignature, ":")
 	signature := parts[len(parts)-1]
 
-	return dto.SignJWT{
-		Version:   keyVersion,
-		Signature: signature,
-	}, nil
+	return signature, nil
 }
 
 func (v *Vault) GetPublicKeys(ctx context.Context) (dto.PublicKeys, error) {

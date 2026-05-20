@@ -86,7 +86,7 @@ func run() error {
 
 	logger.Info("initializing pkg transit")
 
-	transit := vault.NewTransit(&cfg.Vault)
+	transit := vault.NewTransit(&cfg.Vault, logger.With(zap.String("module", "transit")))
 
 	logger.Info("initializing clients")
 

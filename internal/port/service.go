@@ -16,6 +16,6 @@ type (
 	}
 
 	JWKSService interface {
-		Get(context.Context) (dto.PublicKeys, error)
+		Get(context.Context) (dto.JWKS, error)
 	}
 )

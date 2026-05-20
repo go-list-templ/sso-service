@@ -11,39 +11,55 @@ import (
 	"github.com/go-list-templ/sso-service/internal/core/dto"
 )
 
+const (
+	Algorithm = "RS256"
+	Type      = "RSA"
+	Use       = "sig"
+)
+
 type JWKS struct{}
 
 func New() *JWKS {
 	return &JWKS{}
 }
 
-func pemToJWK(publicKeys dto.PublicKeys) (dto.JWK, error) {
-	block, _ := pem.Decode([]byte(pemStr))
-	if block == nil {
-		return dto.JWK{}, errors.New("failed to parse PEM block")
+func (j *JWKS) FromPublicKeys(publicKeys dto.PublicKeys) (dto.JWKS, error) {
+	result := dto.JWKS{
+		Keys: make([]dto.JWK, 0, len(publicKeys.Keys)),
 	}
 
-	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return dto.JWK{}, err
+	for _, pubKey := range publicKeys.Keys {
+		block, _ := pem.Decode([]byte(pubKey.Key))
+		if block == nil {
+			return dto.JWKS{}, errors.New("parse pem for version: " + pubKey.Version)
+		}
+
+		pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+		if err != nil {
+			return dto.JWKS{}, err
+		}
+
+		rsaPub, ok := pub.(*rsa.PublicKey)
+		if !ok {
+			return dto.JWKS{}, errors.New("key is not an rsa for version: " + pubKey.Version)
+		}
+
+		eBytes := big.NewInt(int64(rsaPub.E)).Bytes()
+
+		eBase64 := base64.RawURLEncoding.EncodeToString(eBytes)
+		nBase64 := base64.RawURLEncoding.EncodeToString(rsaPub.N.Bytes())
+
+		jwk := dto.JWK{
+			Alg: Algorithm,
+			E:   eBase64,
+			Kid: pubKey.Version,
+			Kty: Type,
+			N:   nBase64,
+			Use: Use,
+		}
+
+		result.Keys = append(result.Keys, jwk)
 	}
 
-	rsaPub, ok := pub.(*rsa.PublicKey)
-	if !ok {
-		return dto.JWK{}, errors.New("key is not an RSA public key")
-	}
-
-	eBytes := big.NewInt(int64(rsaPub.E)).Bytes()
-	eBase64 := base64.RawURLEncoding.EncodeToString(eBytes)
-
-	nBase64 := base64.RawURLEncoding.EncodeToString(rsaPub.N.Bytes())
-
-	return dto.JWK{
-		Alg: "RS256",
-		E:   eBase64,
-		Kid: version,
-		Kty: "RSA",
-		N:   nBase64,
-		Use: "sig",
-	}, nil
+	return result, nil
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/go-list-templ/sso-service/internal/adapter/persistence/mongo"
 	"github.com/go-list-templ/sso-service/internal/core/service"
 	"github.com/go-list-templ/sso-service/pkg/config"
+	"github.com/go-list-templ/sso-service/pkg/jwks"
 	"github.com/go-list-templ/sso-service/pkg/otel"
 	"github.com/go-list-templ/sso-service/pkg/token"
 	"github.com/go-list-templ/sso-service/pkg/vault"
@@ -68,6 +69,10 @@ func run() error {
 
 	authMongoRepo := mongorepo.NewSession(mdb, logger.With(zap.String("module", "mongo auth repo")))
 
+	logger.Info("initializing pkg jwks")
+
+	jwksPkg := jwks.New()
+
 	logger.Info("initializing pkg token")
 
 	tk := token.NewToken(cfg, logger.With(zap.String("module", "token")))
@@ -91,7 +96,7 @@ func run() error {
 	logger.Info("initializing services")
 
 	authService := service.NewAuth(userClt, vaultClt, authMongoRepo, tk)
-	JWKSService := service.NewJWKS(vaultClt)
+	JWKSService := service.NewJWKS(vaultClt, jwksPkg)
 
 	logger.Info("initializing servers")
 

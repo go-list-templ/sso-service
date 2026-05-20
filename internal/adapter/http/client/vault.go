@@ -50,6 +50,8 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken, version string) (str
 		return "", err
 	}
 
+	v.logger.Info("sign token version", zap.Any("context", ctx), zap.String("version", version))
+
 	rawSignature := fmt.Sprintf("%v", secret.Data["signature"])
 
 	parts := strings.Split(rawSignature, ":")

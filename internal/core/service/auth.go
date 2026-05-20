@@ -8,6 +8,7 @@ import (
 	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/internal/port"
 	"github.com/go-list-templ/sso-service/pkg/token"
+	"github.com/go-list-templ/sso-service/pkg/vault"
 )
 
 type Auth struct {
@@ -15,10 +16,11 @@ type Auth struct {
 	vaultClient port.VaultClient
 	repo        port.SessionRepo
 	token       *token.Token
+	transit     *vault.Transit
 }
 
-func NewAuth(u port.UserClient, v port.VaultClient, r port.SessionRepo, t *token.Token) *Auth {
-	return &Auth{u, v, r, t}
+func NewAuth(u port.UserClient, v port.VaultClient, r port.SessionRepo, t *token.Token, tr *vault.Transit) *Auth {
+	return &Auth{u, v, r, t, tr}
 }
 
 func (a *Auth) Register(ctx context.Context, input dto.AuthInput) (dto.AuthOutput, error) {
@@ -77,17 +79,22 @@ func (a *Auth) createSession(ctx context.Context, userId string) (dto.AuthOutput
 		return dto.AuthOutput{}, err
 	}
 
-	unsignedToken, err := a.token.Unsigned(userId, session.CreatedAt)
+	transitVersion, err := a.transit.Version()
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}
 
-	signJWT, err := a.vaultClient.SignJWT(ctx, unsignedToken)
+	unsignedToken, err := a.token.Unsigned(userId, transitVersion, session.CreatedAt)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}
 
-	accessToken, err := a.token.CreateAccess(unsignedToken, signJWT)
+	signature, err := a.vaultClient.SignJWT(ctx, unsignedToken, transitVersion)
+	if err != nil {
+		return dto.AuthOutput{}, err
+	}
+
+	accessToken, err := a.token.CreateAccess(unsignedToken, signature)
 	if err != nil {
 		return dto.AuthOutput{}, err
 	}

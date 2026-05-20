@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -48,8 +49,8 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken string) (dto.SignJWT,
 		return dto.SignJWT{}, err
 	}
 
-	keyVersion := secret.Data["key_version"].(string)
-	rawSignature := secret.Data["signature"].(string)
+	keyVersion := fmt.Sprintf("%v", secret.Data["key_version"])
+	rawSignature := fmt.Sprintf("%v", secret.Data["signature"])
 
 	parts := strings.Split(rawSignature, ":")
 	signature := parts[len(parts)-1]

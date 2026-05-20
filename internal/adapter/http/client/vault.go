@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -18,6 +19,10 @@ const (
 
 	SignPath = "transit/sign"
 	KeysPath = "transit/keys"
+)
+
+var (
+	ErrInvalidSignature = errors.New("invalid signature format")
 )
 
 type Vault struct {
@@ -50,14 +55,20 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken, version string) (str
 		return "", err
 	}
 
-	v.logger.Info("sign token version", zap.Any("context", ctx), zap.String("version", version))
-
 	rawSignature := fmt.Sprintf("%v", secret.Data["signature"])
 
 	parts := strings.Split(rawSignature, ":")
+	if len(parts) < 3 {
+		v.logger.Error("invalid signature format", zap.Any("context", ctx), zap.Error(ErrInvalidSignature))
+
+		return "", ErrInvalidSignature
+	}
+
+	v.logger.Info("sign token", zap.Any("context", ctx), zap.String("version", version))
+
 	signature := parts[len(parts)-1]
 
-	return signature, nil
+	return strings.TrimSpace(signature), nil
 }
 
 func (v *Vault) GetPublicKeys(ctx context.Context) (dto.PublicKeys, error) {

@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -15,6 +16,9 @@ import (
 )
 
 const (
+	SignAlgorithm = "pkcs1v15"
+	Prehashed     = true
+
 	SignPath = "transit/sign"
 	KeysPath = "transit/keys"
 )
@@ -40,9 +44,15 @@ func RegisterVault(c *config.Vault, v *vault.Vault, l *zap.Logger) *Vault {
 func (v *Vault) SignJWT(ctx context.Context, unsignedToken, version string) (string, error) {
 	path := filepath.Join(SignPath, v.cfg.TransitName)
 
+	hasher := sha256.New()
+	hasher.Write([]byte(unsignedToken))
+	hashed := hasher.Sum(nil)
+
 	data := map[string]any{
-		"input":       base64.StdEncoding.EncodeToString([]byte(unsignedToken)),
-		"key_version": version,
+		"input":               base64.StdEncoding.EncodeToString(hashed),
+		"key_version":         version,
+		"prehashed":           Prehashed,
+		"signature_algorithm": SignAlgorithm,
 	}
 
 	secret, err := v.vault.Logical().WriteWithContext(ctx, path, data)
@@ -56,23 +66,19 @@ func (v *Vault) SignJWT(ctx context.Context, unsignedToken, version string) (str
 
 	parts := strings.Split(rawSignature, ":")
 	if len(parts) < 3 {
-		v.logger.Error("invalid signature format", zap.Any("context", ctx), zap.Error(ErrInvalidSignature))
-
 		return "", ErrInvalidSignature
 	}
 
-	v.logger.Info("sign token", zap.Any("context", ctx), zap.String("version", version))
-
-	signature := parts[len(parts)-1]
-	decodedSig, err := base64.StdEncoding.DecodeString(signature)
+	decodedSig, err := base64.StdEncoding.DecodeString(parts[len(parts)-1])
 	if err != nil {
 		v.logger.Error("decode signature", zap.Any("context", ctx), zap.Error(err))
+
 		return "", err
 	}
 
-	jwtSafeSignature := base64.RawURLEncoding.EncodeToString(decodedSig)
+	signature := base64.RawURLEncoding.EncodeToString(decodedSig)
 
-	return strings.TrimSpace(jwtSafeSignature), nil
+	return signature, nil
 }
 
 func (v *Vault) GetPublicKeys(ctx context.Context) (dto.PublicKeys, error) {

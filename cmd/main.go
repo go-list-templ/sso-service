@@ -84,6 +84,10 @@ func run() error {
 		logger.Panic("init vault", zap.Error(err))
 	}
 
+	logger.Info("initializing pkg transit")
+
+	transit := vault.NewTransit(&cfg.Vault)
+
 	logger.Info("initializing clients")
 
 	vaultClt := httpclient.RegisterVault(&cfg.Vault, va, logger.With(zap.String("module", "vault client")))
@@ -95,7 +99,7 @@ func run() error {
 
 	logger.Info("initializing services")
 
-	authService := service.NewAuth(userClt, vaultClt, authMongoRepo, tk)
+	authService := service.NewAuth(userClt, vaultClt, authMongoRepo, tk, transit)
 	JWKSService := service.NewJWKS(vaultClt, jwksPkg)
 
 	logger.Info("initializing servers")

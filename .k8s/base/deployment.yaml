@@ -13,6 +13,14 @@ spec:
     metadata:
       labels:
         app: sso-service
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "sso-service-role"
+        vault.hashicorp.com/agent-inject-secret-key-version.txt: "transit/keys/sso-service-keys"
+        vault.hashicorp.com/agent-inject-template-key-version.txt: |
+          {{ with secret "transit/keys/sso-service-keys" }}
+          {{ .Data.latest_version }}
+          {{ end }}
     spec:
       serviceAccountName: sso-service-sa
       containers:

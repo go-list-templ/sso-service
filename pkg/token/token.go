@@ -3,12 +3,10 @@ package token
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
-	"strings"
+	"fmt"
 	"time"
 
-	"github.com/go-list-templ/sso-service/internal/core/dto"
 	"github.com/go-list-templ/sso-service/pkg/config"
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
@@ -30,7 +28,7 @@ func NewToken(cfg *config.Config, l *zap.Logger) *Token {
 	return &Token{cfg, l}
 }
 
-func (t *Token) Unsigned(userId string, sessionCreatedAt time.Time) (string, error) {
+func (t *Token) Unsigned(userId, keyVersion string, sessionCreatedAt time.Time) (string, error) {
 	claims := jwt.MapClaims{
 		"iss": t.cfg.App.ServiceName,
 		"sub": userId,
@@ -40,42 +38,17 @@ func (t *Token) Unsigned(userId string, sessionCreatedAt time.Time) (string, err
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token.Header["kid"] = keyVersion
 
 	return token.SigningString()
 }
 
-func (t *Token) CreateAccess(unsignedToken string, signJWT dto.SignJWT) (string, error) {
-	if unsignedToken == "" || signJWT.Signature == "" {
+func (t *Token) CreateAccess(unsignedToken, signature string) (string, error) {
+	if unsignedToken == "" || signature == "" {
 		return "", errors.New("invalid token components")
 	}
 
-	parts := strings.Split(unsignedToken, ".")
-	if len(parts) != 2 {
-		return "", errors.New("invalid unsigned token format")
-	}
-
-	base64Header, payload := parts[0], parts[1]
-
-	headerBytes, err := base64.RawURLEncoding.DecodeString(base64Header)
-	if err != nil {
-		return "", err
-	}
-
-	var header map[string]any
-	if err = json.Unmarshal(headerBytes, &header); err != nil {
-		return "", err
-	}
-
-	header["kid"] = signJWT.Version
-
-	newHeaderBytes, err := json.Marshal(header)
-	if err != nil {
-		return "", err
-	}
-
-	accessToken := base64.RawURLEncoding.EncodeToString(newHeaderBytes) + "." + payload + "." + signJWT.Signature
-
-	return accessToken, nil
+	return fmt.Sprintf("%v.%v", unsignedToken, signature), nil
 }
 
 func (t *Token) CreateRefresh() (string, error) {
